@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -124,13 +123,8 @@ func handleGetAmountInput(ctx context.Context, b *bot.Bot, update *models.Update
 }
 
 func handleGetTab(ctx context.Context, b *bot.Bot, update *models.Update) {
-	db, err := sql.Open("mysql", os.Getenv("DATABASE_ADMIN"))
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	senderUsername := update.Message.Chat.Username
-	u, err := user.NewUser(senderUsername, db)
+	u, err := user.NewUser(senderUsername)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -208,11 +202,7 @@ func getAmount(s string) (int, error) {
 }
 
 func handleAddToUserTab(username string, amount int) (userTab int, err error) {
-	db, err := sql.Open("mysql", os.Getenv("DATABASE_ADMIN"))
-	if err != nil {
-		return 0, err
-	}
-	u, err := user.NewUser(username, db)
+	u, err := user.NewUser(username)
 	if err != nil {
 		return 0, err
 	}
