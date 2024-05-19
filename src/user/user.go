@@ -113,15 +113,15 @@ func (u *User) GetBalance() (int, error) {
 	return balance, nil
 }
 
-// AddToTab adds the amount to the user's tab.
-func (u *User) AddToTab(amount int) error {
+// AddToTab adds the amount to the user's tab. Returns the transaction ID and an error.
+func (u *User) AddToTab(amount int) (int, error) {
 	// Tabs are represented as negative balances in the database.
 	// When adding to the tab, the amount is subtracted from current balance.
 	return transaction.New(u.db, u.ID, -amount)
 }
 
-// PayBackTab subtracts the amount from user's tab.
-func (u *User) PayBackTab(amount int) error {
+// PayBackTab subtracts the amount from user's tab. Returns the transaction ID and an error.
+func (u *User) PayBackTab(amount int) (int, error) {
 	// Tabs are represented as negative balances in the database.
 	// When paying back the tab, the amount is added to current balance.
 	return transaction.New(u.db, u.ID, amount)

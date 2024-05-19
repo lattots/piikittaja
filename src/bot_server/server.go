@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,6 +10,7 @@ import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/joho/godotenv"
+	"github.com/lattots/gipher"
 	"github.com/lattots/piikittaja/src/user"
 	"log"
 	"os"
@@ -76,13 +78,37 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	// if function errors, the message is not an amount, and it should be handled as unknown command
 	// if function doesn't error, amount exists, and it should be handled as new tab
 	if err == nil {
-		tab, err := handleAddToUserTab(sender, amount)
+		usr, err := user.NewUser(int(sender.ID), sender.Username)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Printf("Käyttäjä %s piikkasi juuri %d€", sender.Username, amount)
 
-		response = fmt.Sprintf("Saldosi on nyt %d€", tab)
+		transactionId, err := usr.AddToTab(amount)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		err = createAnimation(amount, transactionId)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		params, err := getSendAnimationParams(update, transactionId)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		_, err = b.SendAnimation(ctx, params)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		balance, err := usr.GetBalance()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		response = fmt.Sprintf("Saldosi on nyt %d€", balance)
 	} else {
 		response = "En ymmärtänyt tuota. Kirjoita /apua saadaksesi apua."
 	}
@@ -94,6 +120,7 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if err != nil {
 		log.Fatalln("error sending message:\n", err)
 	}
+
 }
 
 func handleStart(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -200,20 +227,18 @@ func getAmount(s string) (int, error) {
 	return amount, nil
 }
 
-func handleAddToUserTab(sender *models.User, amount int) (userTab int, err error) {
+func addToUserTab(sender *models.User, amount int) (transactionId int, err error) {
 	u, err := user.NewUser(int(sender.ID), sender.Username)
 	if err != nil {
 		return 0, err
 	}
 
-	err = u.AddToTab(amount)
+	transactionId, err = u.AddToTab(amount)
 	if err != nil {
 		return 0, err
 	}
 
-	userTab, err = u.GetBalance()
-
-	return userTab, err
+	return transactionId, err
 }
 
 func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update) error {
@@ -247,4 +272,48 @@ func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update
 	}
 
 	return nil
+}
+
+func createAnimation(amount, transactionId int) error {
+	var backgroundFilename string
+	switch amount {
+	case 1:
+		backgroundFilename = "./static/1€.gif"
+	case 2:
+		backgroundFilename = "./static/2€.gif"
+	case 5:
+		backgroundFilename = "./static/5€.gif"
+	case 10:
+		backgroundFilename = "./static/10€.gif"
+	}
+
+	outputFilename := fmt.Sprintf("%d.gif", transactionId)
+	const fontFilename = "./static/Raleway-Black.ttf"
+
+	err := gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
+	return err
+}
+
+func getSendAnimationParams(update *models.Update, transactionId int) (*bot.SendAnimationParams, error) {
+	animationFile, err := os.Open(fmt.Sprintf("%d.gif", transactionId))
+	if err != nil {
+		return nil, fmt.Errorf("error opening GIF file with ID %d: %s", transactionId, err)
+	}
+
+	reader := bufio.NewReader(animationFile)
+
+	animation := &models.InputFileUpload{
+		Filename: "rahaa",
+		Data:     reader,
+	}
+
+	params := &bot.SendAnimationParams{
+		ChatID:    update.Message.Chat.ID,
+		Width:     100,
+		Height:    100,
+		Duration:  1,
+		Animation: animation,
+	}
+
+	return params, nil
 }
