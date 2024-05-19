@@ -5,17 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
-	"os"
-	"os/signal"
-	"regexp"
-	"strconv"
-
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/joho/godotenv"
 	"github.com/lattots/piikittaja/src/user"
+	"log"
+	"os"
+	"os/signal"
+	"regexp"
+	"strconv"
 )
 
 func main() {
@@ -48,7 +47,7 @@ func main() {
 	})
 	commands = append(commands, models.BotCommand{
 		Command:     "/apua",
-		Description: "Apua!.",
+		Description: "Apua!",
 	})
 	_, err = b.SetMyCommands(ctx, &bot.SetMyCommandsParams{Commands: commands})
 	if err != nil {
@@ -68,7 +67,7 @@ func main() {
 }
 
 func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	senderUsername := update.Message.Chat.Username
+	sender := update.Message.From
 	receivedMessage := update.Message.Text
 
 	amount, err := getAmount(receivedMessage)
@@ -77,11 +76,11 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	// if function errors, the message is not an amount, and it should be handled as unknown command
 	// if function doesn't error, amount exists, and it should be handled as new tab
 	if err == nil {
-		tab, err := handleAddToUserTab(senderUsername, amount)
+		tab, err := handleAddToUserTab(sender, amount)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		log.Printf("Käyttäjä %s piikkasi juuri %d€", senderUsername, amount)
+		log.Printf("Käyttäjä %s piikkasi juuri %d€", sender.Username, amount)
 
 		response = fmt.Sprintf("Piikkisi on nyt %d€", tab)
 	} else {
@@ -123,15 +122,15 @@ func handleGetAmountInput(ctx context.Context, b *bot.Bot, update *models.Update
 }
 
 func handleGetTab(ctx context.Context, b *bot.Bot, update *models.Update) {
-	senderUsername := update.Message.Chat.Username
-	u, err := user.NewUser(senderUsername)
+	sender := update.Message.From
+	u, err := user.NewUser(int(sender.ID), sender.Username)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	var response string
 
-	tab, err := u.GetTab()
+	tab, err := u.GetBalance()
 	if err != nil {
 		log.Println(err)
 		response = "En löytänyt piikkiäsi..."
@@ -201,8 +200,8 @@ func getAmount(s string) (int, error) {
 	return amount, nil
 }
 
-func handleAddToUserTab(username string, amount int) (userTab int, err error) {
-	u, err := user.NewUser(username)
+func handleAddToUserTab(sender *models.User, amount int) (userTab int, err error) {
+	u, err := user.NewUser(int(sender.ID), sender.Username)
 	if err != nil {
 		return 0, err
 	}
@@ -212,7 +211,7 @@ func handleAddToUserTab(username string, amount int) (userTab int, err error) {
 		return 0, err
 	}
 
-	userTab, err = u.GetTab()
+	userTab, err = u.GetBalance()
 
 	return userTab, err
 }
