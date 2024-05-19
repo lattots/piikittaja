@@ -82,7 +82,7 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		}
 		log.Printf("Käyttäjä %s piikkasi juuri %d€", sender.Username, amount)
 
-		response = fmt.Sprintf("Piikkisi on nyt %d€", tab)
+		response = fmt.Sprintf("Saldosi on nyt %d€", tab)
 	} else {
 		response = "En ymmärtänyt tuota. Kirjoita /apua saadaksesi apua."
 	}
@@ -135,7 +135,7 @@ func handleGetTab(ctx context.Context, b *bot.Bot, update *models.Update) {
 		log.Println(err)
 		response = "En löytänyt piikkiäsi..."
 	} else {
-		response = fmt.Sprintf("Piikkisi on nyt: %d€", tab)
+		response = fmt.Sprintf("Saldosi on nyt: %d€", tab)
 	}
 
 	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
