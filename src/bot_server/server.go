@@ -16,11 +16,12 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"slices"
 	"strconv"
 )
 
 func main() {
-	err := godotenv.Load("../../data/.env")
+	err := godotenv.Load("./data/.env")
 	if err != nil {
 		log.Fatalln("error loading .env file: ", err)
 	}
@@ -99,6 +100,11 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		}
 
 		_, err = b.SendAnimation(ctx, params)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		err = os.Remove(fmt.Sprintf("./data/telegram_bot/tmp/%d.gif", transactionId))
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -224,21 +230,16 @@ func getAmount(s string) (int, error) {
 		return 0, err
 	}
 
+	// Only these amounts can be added to tab by user.
+	validAmounts := []int{1, 2, 5, 10}
+
+	// Inputted amount is validated.
+	if !slices.Contains(validAmounts, amount) {
+		// If amount is not valid, function errors.
+		return 0, fmt.Errorf("amount is not valid: %d", amount)
+	}
+
 	return amount, nil
-}
-
-func addToUserTab(sender *models.User, amount int) (transactionId int, err error) {
-	u, err := user.NewUser(int(sender.ID), sender.Username)
-	if err != nil {
-		return 0, err
-	}
-
-	transactionId, err = u.AddToTab(amount)
-	if err != nil {
-		return 0, err
-	}
-
-	return transactionId, err
 }
 
 func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update) error {
@@ -278,24 +279,26 @@ func createAnimation(amount, transactionId int) error {
 	var backgroundFilename string
 	switch amount {
 	case 1:
-		backgroundFilename = "./static/1€.gif"
+		backgroundFilename = "./data/telegram_bot/1€.gif"
 	case 2:
-		backgroundFilename = "./static/2€.gif"
+		backgroundFilename = "./data/telegram_bot/2€.gif"
 	case 5:
-		backgroundFilename = "./static/5€.gif"
+		backgroundFilename = "./data/telegram_bot/5€.gif"
 	case 10:
-		backgroundFilename = "./static/10€.gif"
+		backgroundFilename = "./data/telegram_bot/10€.gif"
+	default:
+		return fmt.Errorf("error creating animation for amount: %d", amount)
 	}
 
-	outputFilename := fmt.Sprintf("%d.gif", transactionId)
-	const fontFilename = "./static/Raleway-Black.ttf"
+	outputFilename := fmt.Sprintf("./data/telegram_bot/tmp/%d.gif", transactionId)
+	const fontFilename = "./data/telegram_bot/Raleway-Black.ttf"
 
 	err := gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
 	return err
 }
 
 func getSendAnimationParams(update *models.Update, transactionId int) (*bot.SendAnimationParams, error) {
-	animationFile, err := os.Open(fmt.Sprintf("%d.gif", transactionId))
+	animationFile, err := os.Open(fmt.Sprintf("./data/telegram_bot/tmp/%d.gif", transactionId))
 	if err != nil {
 		return nil, fmt.Errorf("error opening GIF file with ID %d: %s", transactionId, err)
 	}
