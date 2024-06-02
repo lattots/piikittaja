@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lattots/piikittaja/src/transaction"
+	"github.com/lattots/piikittaja/pkg/transaction"
 	"os"
 )
 

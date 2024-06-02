@@ -5,7 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
-	"github.com/lattots/piikittaja/src/user"
+	"github.com/lattots/piikittaja/pkg/user"
 	"html/template"
 	"log"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	err := godotenv.Load("../../data/.env")
+	err := godotenv.Load("../../assets/.env")
 	if err != nil {
 		log.Fatalln("error loading .env file: ", err)
 	}
@@ -29,7 +29,7 @@ func main() {
 
 	port := ":3000"
 	fmt.Printf("Server started on port %s\n", port)
-	if err := http.ListenAndServe(port, router); err != nil {
+	if err := http.ListenAndServeTLS(port, "./tls/app.crt", "./tls/app.key", router); err != nil {
 		log.Fatalln("unexpected error: ", err)
 	}
 }
@@ -121,9 +121,9 @@ func handleUserAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if action.Action == "borrow" {
-		err = usr.AddToTab(action.Amount)
+		_, err = usr.AddToTab(action.Amount)
 	} else if action.Action == "pay" {
-		err = usr.PayBackTab(action.Amount)
+		_, err = usr.PayBackTab(action.Amount)
 	} else {
 		log.Println("unknown action", err)
 		http.Error(w, "unknown action", http.StatusBadRequest)
