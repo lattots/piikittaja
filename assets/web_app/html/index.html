@@ -46,7 +46,7 @@
 </div>
 {{ end }}
 
-<form hx-post="http://localhost:3000/action" hx-swap="innerHTML" hx-target="#form-container">
+<form hx-post="https://piikki.stadi.ninja:3000/action" hx-swap="innerHTML" hx-target="#form-container">
     <label for="username-input"></label>
     <input type="text" name="username" id="username-input" placeholder="Käyttäjänimi" /><br>
     <label for="amount-input"></label>
@@ -63,7 +63,7 @@
 
 {{ block "user-view" . }}
 
-<table id="user-view-table" hx-trigger="load, every 10s" hx-get="http://localhost:3000/user-view"
+<table id="user-view-table" hx-trigger="load, every 10s" hx-get="https://piikki.stadi.ninja:3000/user-view"
        hx-target="#user-view-entry-container" hx-swap="innerHTML">
     <thead>
         <tr>
