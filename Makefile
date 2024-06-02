@@ -1,6 +1,13 @@
-run:
-	./bin/telegram_bot
+.PHONY: run build
 
 build:
+	mkdir -p bin
 	go build -o bin/telegram_bot cmd/telegram_bot/server.go
 	go build -o bin/web_app cmd/web_app/server.go
+
+run: build
+	./bin/telegram_bot &
+	./bin/web_app &
+
+clean:
+	rm -rf ./bin/*
