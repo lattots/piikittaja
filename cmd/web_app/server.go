@@ -14,28 +14,33 @@ import (
 )
 
 func main() {
-	err := godotenv.Load("../../assets/.env")
+	err := godotenv.Load("./assets/.env")
 	if err != nil {
 		log.Fatalln("error loading .env file: ", err)
 	}
 
 	router := http.NewServeMux()
 
-	staticFileHandler := http.FileServer(http.Dir("."))
-	router.Handle("/css/", staticFileHandler)
+	// Serve static files from the 'assets/web_app' directory
+	staticFileHandler := http.StripPrefix("/assets/web_app/", http.FileServer(http.Dir("./assets/web_app")))
+	router.Handle("/assets/web_app/", staticFileHandler)
+
 	router.HandleFunc("/", handleIndex)
 	router.HandleFunc("/action", handleUserAction)
 	router.HandleFunc("/user-view", handleUserView)
 
+	certFilePath := "/etc/letsencrypt/live/piikki.stadi.ninja/fullchain.pem"
+	keyFilePath := "/etc/letsencrypt/live/piikki.stadi.ninja/privkey.pem"
+
 	port := ":3000"
 	fmt.Printf("Server started on port %s\n", port)
-	if err := http.ListenAndServeTLS(port, "./tls/app.crt", "./tls/app.key", router); err != nil {
+	if err := http.ListenAndServeTLS(port, certFilePath, keyFilePath, router); err != nil {
 		log.Fatalln("unexpected error: ", err)
 	}
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
-	indexTempl, err := template.ParseFiles("./html/index.html")
+	indexTempl, err := template.ParseFiles("./assets/web_app/html/index.html")
 	if err != nil {
 		log.Println("error parsing html template")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -62,7 +67,8 @@ type Action struct {
 }
 
 func handleUserAction(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("./html/index.html")
+	log.Println("Action called")
+	tmpl, err := template.ParseFiles("./assets/web_app/html/index.html")
 	if err != nil {
 		log.Println("error parsing html template")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -148,7 +154,8 @@ func handleUserAction(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleUserView(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("./html/index.html")
+	log.Println("User view called")
+	tmpl, err := template.ParseFiles("./assets/web_app/html/index.html")
 	if err != nil {
 		log.Println("error parsing html template")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
