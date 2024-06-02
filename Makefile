@@ -11,3 +11,7 @@ run: build
 
 clean:
 	rm -rf ./bin/*
+
+prod:
+	./bin/telegram_bot &
+	./bin/web_app &
