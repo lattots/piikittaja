@@ -67,7 +67,6 @@ type Action struct {
 }
 
 func handleUserAction(w http.ResponseWriter, r *http.Request) {
-	log.Println("Action called")
 	tmpl, err := template.ParseFiles("./assets/web_app/html/index.html")
 	if err != nil {
 		log.Println("error parsing html template")
@@ -154,7 +153,6 @@ func handleUserAction(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleUserView(w http.ResponseWriter, r *http.Request) {
-	log.Println("User view called")
 	tmpl, err := template.ParseFiles("./assets/web_app/html/index.html")
 	if err != nil {
 		log.Println("error parsing html template")
