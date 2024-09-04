@@ -6,18 +6,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-telegram/bot"
-	"github.com/go-telegram/bot/models"
-	"github.com/joho/godotenv"
-	"github.com/lattots/gipher"
-	"github.com/lattots/piikittaja/pkg/user"
 	"log"
 	"os"
 	"os/signal"
 	"regexp"
 	"slices"
 	"strconv"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
+	"github.com/joho/godotenv"
+	"github.com/lattots/gipher"
+
+	"github.com/lattots/piikittaja/pkg/user"
 )
 
 func main() {
@@ -133,7 +135,8 @@ func handleStart(ctx context.Context, b *bot.Bot, update *models.Update) {
 	senderUsername := update.Message.Chat.Username
 
 	msg := fmt.Sprintf(
-		"Hyvää päivää, %s. Olet avannut PiikkiBotin. Onnittelut erinomaisesta valinnasta!",
+		"Hyvää päivää, %s. Olet avannut PiikkiBotin. Onnittelut erinomaisesta valinnasta!\n\n"+
+			"Olet sitten kokenut piikittäjä tai portista astuva noviisi, saat apua kirjoittamalla /apua",
 		senderUsername,
 	)
 

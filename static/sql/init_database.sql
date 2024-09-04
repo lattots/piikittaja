@@ -14,6 +14,10 @@ CREATE TABLE transactions (
     amount INT NOT NULL
 );
 
+CREATE TABLE admins (
+    email CHAR(255) NOT NULL PRIMARY KEY
+);
+
 DELIMITER $$
 CREATE TRIGGER update_user_balance AFTER INSERT ON transactions
     FOR EACH ROW

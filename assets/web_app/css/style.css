@@ -114,6 +114,11 @@ th {
     vertical-align: middle;
 }
 
+tr:hover {
+    background-color: lightgrey;
+    border-radius: 20px;
+}
+
 td {
     text-align: center;
     border-right: 1px solid darkgrey;
@@ -122,4 +127,12 @@ td {
 /* Right border from the rightmost column is removed */
 th:last-child, td:last-child {
     border-right: none;
+}
+
+#login-button-container {
+    align-content: center;
+}
+
+#login-button {
+
 }

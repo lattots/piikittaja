@@ -1,0 +1,116 @@
+{{ block "index" . }}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PiikkiBotti</title>
+    <link rel="stylesheet" href="/assets/web_app/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+</head>
+<body>
+<h1>PIIKKI</h1>
+
+<div id="scroll-button-container">
+    <a id="scroll-button" href="#main-view-container">
+        <svg id="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"/>
+        </svg>
+    </a>
+</div>
+
+<div id="main-view-container">
+    <div id="user-actions">
+        {{ template "action-form" . }}
+    </div>
+
+    <div id="users-view">
+        {{ template "user-view" . }}
+    </div>
+</div>
+</body>
+</html>
+
+{{ end }}
+
+{{ block "action-form" . }}
+
+<div id="form-container">
+{{ if .ActionStatus }}
+<div id="action-status">
+    {{ .ActionStatus }}
+</div>
+{{ end }}
+
+<form hx-post="/action" hx-swap="innerHTML" hx-target="#form-container">
+    <label for="username-input"></label>
+    <input type="text" name="username" id="username-input" placeholder="Käyttäjänimi" /><br>
+    <label for="amount-input"></label>
+    <input type="text" name="amount" id="amount-input" placeholder="€€€" /><br>
+    <input type="radio" id="pay" name="action-type" value="pay">
+    <label for="pay">MAKSA</label>
+    <input type="radio" id="borrow" name="action-type" value="borrow">
+    <label for="borrow">LAINAA</label><br>
+    <button id="submit-action" type="submit">TOTEUTA</button>
+</form>
+</div>
+
+{{ end }}
+
+{{ block "user-view" . }}
+
+<table id="user-view-table" hx-trigger="load, every 3s, newUserAction from:body" hx-get="/user-view"
+       hx-target="#user-view-entry-container" hx-swap="innerHTML">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Käyttäjänimi</th>
+            <th>Saldo</th>
+        </tr>
+    </thead>
+    <tbody id="user-view-entry-container"></tbody>
+</table>
+
+{{ end }}
+
+{{ block "single-user-view" . }}
+
+<tr>
+    <td>{{ .ID }}</td>
+    <td>{{ .Username }}</td>
+    <td>{{ .Balance }}</td>
+</tr>
+
+{{ end }}
+
+{{ block "login" . }}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PiikkiBotti</title>
+    <link rel="stylesheet" href="/assets/web_app/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+</head>
+<body>
+<h3>LOGIN</h3>
+
+<div id="login-button-container">
+    <a href="/auth/google" id="login-button">
+        Login with Google
+    </a>
+</div>
+
+</body>
+</html>
+
+{{ end }}
