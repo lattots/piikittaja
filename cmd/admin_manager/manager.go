@@ -9,15 +9,15 @@ import (
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 
 	"github.com/lattots/piikittaja/pkg/auth"
+	"github.com/lattots/piikittaja/pkg/env"
 )
 
 func main() {
-	err := godotenv.Load("./assets/.env")
+	err := env.LoadVariables()
 	if err != nil {
-		log.Fatalln("error loading .env file: ", err)
+		log.Fatalln("error loading environment variables: ", err)
 	}
 
 	reader := bufio.NewReader(os.Stdin)

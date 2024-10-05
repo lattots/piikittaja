@@ -31,11 +31,8 @@ $(MANAGER_BIN): $(wildcard $(MANAGER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	mkdir -p $(BIN_DIR)
 	go build -o $@ $(MANAGER_SRC_DIR)/manager.go
 
-# Run commands
-.PHONY: run
-run: all
-	$(TELEGRAM_BOT_BIN) &
-	$(WEB_APP_BIN) &
+# Build target for the Github build action
+build: all
 
 .PHONY: run-web-app
 run-web-app: $(WEB_APP_BIN)
@@ -57,9 +54,3 @@ remind: $(REMINDER_BIN)
 .PHONY: clean
 clean:
 	rm -rf $(BIN_DIR)/*
-
-# Production run
-.PHONY: prod
-prod: all
-	$(TELEGRAM_BOT_BIN) &
-	$(WEB_APP_BIN) &
