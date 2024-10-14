@@ -54,3 +54,7 @@ remind: $(REMINDER_BIN)
 .PHONY: clean
 clean:
 	rm -rf $(BIN_DIR)/*
+
+.PHONY: deploy
+deploy:
+	./cicd/deploy.sh

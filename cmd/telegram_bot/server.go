@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
-	"slices"
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -233,16 +232,27 @@ func getAmount(s string) (int, error) {
 		return 0, err
 	}
 
-	// Only these amounts can be added to tab by user.
-	validAmounts := []int{1, 2, 5, 10}
-
 	// Inputted amount is validated.
-	if !slices.Contains(validAmounts, amount) {
+	if !isValidAmount(amount) {
 		// If amount is not valid, function errors.
 		return 0, fmt.Errorf("amount is not valid: %d", amount)
 	}
 
 	return amount, nil
+}
+
+func isValidAmount(amount int) bool {
+	validAmounts := []int{
+		1, 2, 5, 10,
+	}
+	isValid := false
+	for _, validAmount := range validAmounts {
+		if amount == validAmount {
+			isValid = true
+			break
+		}
+	}
+	return isValid
 }
 
 func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update) error {
@@ -279,29 +289,27 @@ func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update
 }
 
 func createAnimation(amount, transactionId int) error {
-	var backgroundFilename string
-	switch amount {
-	case 1:
-		backgroundFilename = "./assets/telegram_bot/1€.gif"
-	case 2:
-		backgroundFilename = "./assets/telegram_bot/2€.gif"
-	case 5:
-		backgroundFilename = "./assets/telegram_bot/5€.gif"
-	case 10:
-		backgroundFilename = "./assets/telegram_bot/10€.gif"
-	default:
+	if !isValidAmount(amount) {
 		return fmt.Errorf("error creating animation for amount: %d", amount)
 	}
+	root, err := env.GetProjectRoot()
+	if err != nil {
+		return fmt.Errorf("error getting project root: %v", err)
+	}
+	backgroundFilename := root + fmt.Sprintf("/assets/telegram_bot/%d€.gif", amount)
+	outputFilename := root + fmt.Sprintf("/assets/telegram_bot/tmp/%d.gif", transactionId)
+	fontFilename := root + "/assets/telegram_bot/Raleway-Black.ttf"
 
-	outputFilename := fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId)
-	const fontFilename = "./assets/telegram_bot/Raleway-Black.ttf"
-
-	err := gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
+	err = gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
 	return err
 }
 
 func getSendAnimationParams(update *models.Update, transactionId int) (*bot.SendAnimationParams, error) {
-	animationFile, err := os.Open(fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId))
+	root, err := env.GetProjectRoot()
+	if err != nil {
+		return nil, fmt.Errorf("error getting project root: %v", err)
+	}
+	animationFile, err := os.Open(fmt.Sprintf("%s/assets/telegram_bot/tmp/%d.gif", root, transactionId))
 	if err != nil {
 		return nil, fmt.Errorf("error opening GIF file with ID %d: %s", transactionId, err)
 	}
