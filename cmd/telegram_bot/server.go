@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"regexp"
 	"strconv"
 
@@ -293,6 +294,12 @@ func createAnimation(amount, transactionId int) error {
 		return fmt.Errorf("error creating animation for amount: %d", amount)
 	}
 
+	tmpPath := filepath.Join(".", "assets", "tmp")
+	err := os.MkdirAll(tmpPath, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("error creating tmp directory: %w", err)
+	}
+	
 	backgroundFilename := fmt.Sprintf("./assets/telegram_bot/%d€.gif", amount)
 	outputFilename := fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId)
 	fontFilename := "./assets/telegram_bot/Raleway-Black.ttf"
