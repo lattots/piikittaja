@@ -21,6 +21,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Make script executable
+        run: chmod +x ./cicd/create_env_file.sh
+
+      - name: Create .env File
+        run: ./cicd/create_env_file.sh
+
       - name: Build Telegram Bot
         run: make build-bot
 
