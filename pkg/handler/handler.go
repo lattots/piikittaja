@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"html/template"
 	"os"
-	"path/filepath"
 
 	"github.com/lattots/piikittaja/pkg/auth"
-	"github.com/lattots/piikittaja/pkg/env"
 )
 
 type Handler struct {
@@ -53,13 +51,8 @@ func NewHandler() (*Handler, error) {
 
 	authService := auth.NewService(store, db)
 
-	root, err := env.GetProjectRoot()
-	if err != nil {
-		return nil, fmt.Errorf("error getting project root folder: %w", err)
-	}
-
 	// HTML template file is parsed
-	tmpl, err := template.ParseFiles(filepath.Join(root, "assets/web_app/html/template.html"))
+	tmpl, err := template.ParseFiles("./assets/web_app/html/template.html")
 	if err != nil {
 		return nil, fmt.Errorf("error parsing template: %s", err)
 	}

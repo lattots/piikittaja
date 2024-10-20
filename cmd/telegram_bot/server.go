@@ -15,14 +15,14 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"github.com/joho/godotenv"
 	"github.com/lattots/gipher"
 
-	"github.com/lattots/piikittaja/pkg/env"
 	"github.com/lattots/piikittaja/pkg/user"
 )
 
 func main() {
-	err := env.LoadVariables()
+	err := godotenv.Load("./assets/.env")
 	if err != nil {
 		log.Fatalln("error loading environment variables: ", err)
 	}
@@ -292,24 +292,17 @@ func createAnimation(amount, transactionId int) error {
 	if !isValidAmount(amount) {
 		return fmt.Errorf("error creating animation for amount: %d", amount)
 	}
-	root, err := env.GetProjectRoot()
-	if err != nil {
-		return fmt.Errorf("error getting project root: %v", err)
-	}
-	backgroundFilename := root + fmt.Sprintf("/assets/telegram_bot/%d€.gif", amount)
-	outputFilename := root + fmt.Sprintf("/assets/telegram_bot/tmp/%d.gif", transactionId)
-	fontFilename := root + "/assets/telegram_bot/Raleway-Black.ttf"
 
-	err = gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
+	backgroundFilename := fmt.Sprintf("./assets/telegram_bot/%d€.gif", amount)
+	outputFilename := fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId)
+	fontFilename := "./assets/telegram_bot/Raleway-Black.ttf"
+
+	err := gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
 	return err
 }
 
 func getSendAnimationParams(update *models.Update, transactionId int) (*bot.SendAnimationParams, error) {
-	root, err := env.GetProjectRoot()
-	if err != nil {
-		return nil, fmt.Errorf("error getting project root: %v", err)
-	}
-	animationFile, err := os.Open(fmt.Sprintf("%s/assets/telegram_bot/tmp/%d.gif", root, transactionId))
+	animationFile, err := os.Open(fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId))
 	if err != nil {
 		return nil, fmt.Errorf("error opening GIF file with ID %d: %s", transactionId, err)
 	}

@@ -9,13 +9,13 @@ import (
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 
 	"github.com/lattots/piikittaja/pkg/auth"
-	"github.com/lattots/piikittaja/pkg/env"
 )
 
 func main() {
-	err := env.LoadVariables()
+	err := godotenv.Load("./assets/.env")
 	if err != nil {
 		log.Fatalln("error loading environment variables: ", err)
 	}
