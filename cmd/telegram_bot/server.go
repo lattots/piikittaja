@@ -294,7 +294,9 @@ func createAnimation(amount, transactionId int) error {
 		return fmt.Errorf("error creating animation for amount: %d", amount)
 	}
 
-	tmpPath := filepath.Join(".", "assets", "tmp")
+	// Ensure that the tmp/ directory exists
+	// This directory is used to temporarily store created animation files
+	tmpPath := filepath.Join(".", "assets", "telegram_bot", "tmp")
 	err := os.MkdirAll(tmpPath, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("error creating tmp directory: %w", err)
