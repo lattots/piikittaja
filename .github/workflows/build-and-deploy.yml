@@ -26,6 +26,15 @@ jobs:
 
       - name: Create .env File
         run: ./cicd/create_env_file.sh
+        env:
+          DATABASE_ADMIN: ${{ secrets.DATABASE_ADMIN }}
+          DATABASE_APP: ${{ secrets.DATABASE_APP }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          GOOGLE_KEY: ${{ secrets.GOOGLE_KEY }}
+          GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
+          COOKIE_STORE_SECRET: ${{ secrets.COOKIE_STORE_SECRET }}
+          HOST_URL: ${{ secrets.HOST_URL }}
+          PORT: ${{ secrets.PORT }}
 
       - name: Build Telegram Bot
         run: make build-bot
