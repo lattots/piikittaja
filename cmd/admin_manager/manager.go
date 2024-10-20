@@ -17,7 +17,7 @@ import (
 func main() {
 	err := godotenv.Load("./assets/.env")
 	if err != nil {
-		log.Fatalln("error loading .env file: ", err)
+		log.Fatalln("error loading environment variables: ", err)
 	}
 
 	reader := bufio.NewReader(os.Stdin)

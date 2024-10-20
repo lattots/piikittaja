@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
-	"slices"
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -25,7 +24,7 @@ import (
 func main() {
 	err := godotenv.Load("./assets/.env")
 	if err != nil {
-		log.Fatalln("error loading .env file: ", err)
+		log.Fatalln("error loading environment variables: ", err)
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -233,16 +232,27 @@ func getAmount(s string) (int, error) {
 		return 0, err
 	}
 
-	// Only these amounts can be added to tab by user.
-	validAmounts := []int{1, 2, 5, 10}
-
 	// Inputted amount is validated.
-	if !slices.Contains(validAmounts, amount) {
+	if !isValidAmount(amount) {
 		// If amount is not valid, function errors.
 		return 0, fmt.Errorf("amount is not valid: %d", amount)
 	}
 
 	return amount, nil
+}
+
+func isValidAmount(amount int) bool {
+	validAmounts := []int{
+		1, 2, 5, 10,
+	}
+	isValid := false
+	for _, validAmount := range validAmounts {
+		if amount == validAmount {
+			isValid = true
+			break
+		}
+	}
+	return isValid
 }
 
 func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update) error {
@@ -279,22 +289,13 @@ func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update
 }
 
 func createAnimation(amount, transactionId int) error {
-	var backgroundFilename string
-	switch amount {
-	case 1:
-		backgroundFilename = "./assets/telegram_bot/1€.gif"
-	case 2:
-		backgroundFilename = "./assets/telegram_bot/2€.gif"
-	case 5:
-		backgroundFilename = "./assets/telegram_bot/5€.gif"
-	case 10:
-		backgroundFilename = "./assets/telegram_bot/10€.gif"
-	default:
+	if !isValidAmount(amount) {
 		return fmt.Errorf("error creating animation for amount: %d", amount)
 	}
 
+	backgroundFilename := fmt.Sprintf("./assets/telegram_bot/%d€.gif", amount)
 	outputFilename := fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId)
-	const fontFilename = "./assets/telegram_bot/Raleway-Black.ttf"
+	fontFilename := "./assets/telegram_bot/Raleway-Black.ttf"
 
 	err := gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
 	return err

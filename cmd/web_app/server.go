@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -16,7 +15,7 @@ import (
 func main() {
 	err := godotenv.Load("./assets/.env")
 	if err != nil {
-		log.Fatalln("error loading .env file: ", err)
+		log.Fatalln("error loading environment variables: ", err)
 	}
 
 	router := http.NewServeMux()
@@ -43,20 +42,10 @@ func main() {
 	router.HandleFunc("GET /logout/{provider}", h.HandleLogout)
 	router.HandleFunc("GET /auth/{provider}", h.HandleProviderLogin)
 
-	certFilePath := "/etc/letsencrypt/live/piikki.stadi.ninja/fullchain.pem"
-	keyFilePath := "/etc/letsencrypt/live/piikki.stadi.ninja/privkey.pem"
-
 	port := ":3000"
 	fmt.Printf("Server started on port %s\n", port)
 
-	// If server is run in local test environment, it doesn't use tls
-	if os.Getenv("ENVIRONMENT") == "local" {
-		if err = http.ListenAndServe(port, router); err != nil {
-			log.Fatalln("unexpected error: ", err)
-		}
-	} else {
-		if err = http.ListenAndServeTLS(port, certFilePath, keyFilePath, router); err != nil {
-			log.Fatalln("unexpected error: ", err)
-		}
+	if err = http.ListenAndServe(port, router); err != nil {
+		log.Fatalln("unexpected error: ", err)
 	}
 }

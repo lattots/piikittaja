@@ -12,16 +12,7 @@ REMINDER_SRC_DIR := cmd/reminder
 MANAGER_SRC_DIR := cmd/admin_manager
 
 # Default target
-all: $(TELEGRAM_BOT_BIN) $(WEB_APP_BIN) $(REMINDER_BIN) $(MANAGER_BIN)
-
-# Build targets
-$(TELEGRAM_BOT_BIN): $(wildcard $(TELEGRAM_BOT_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
-	mkdir -p $(BIN_DIR)
-	go build -o $@ $(TELEGRAM_BOT_SRC_DIR)/server.go
-
-$(WEB_APP_BIN): $(wildcard $(WEB_APP_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
-	mkdir -p $(BIN_DIR)
-	go build -o $@ $(WEB_APP_SRC_DIR)/server.go
+all: $(REMINDER_BIN) $(MANAGER_BIN)
 
 $(REMINDER_BIN): $(wildcard $(REMINDER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	mkdir -p $(BIN_DIR)
@@ -31,19 +22,55 @@ $(MANAGER_BIN): $(wildcard $(MANAGER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	mkdir -p $(BIN_DIR)
 	go build -o $@ $(MANAGER_SRC_DIR)/manager.go
 
-# Run commands
-.PHONY: run
-run: all
-	$(TELEGRAM_BOT_BIN) &
-	$(WEB_APP_BIN) &
+# Build target for the Github build action
+build: all
 
-.PHONY: run-web-app
-run-web-app: $(WEB_APP_BIN)
-	$(WEB_APP_BIN)
+# Runs docker compose that spins up containers with "piikki-web" and "piikki-bot" images from Docker Hub
+# Images need to be pushed to the repository before running this
+compose-up:
+	@docker compose -f ./cicd/compose.yaml up -d
 
-.PHONY: run-telegram-bot
-run-telegram-bot: $(TELEGRAM_BOT_BIN)
-	$(TELEGRAM_BOT_BIN)
+compose-down: clean-bot clean-web
+
+.PHONY: run-web stop-web clean-web log-web deploy-web
+
+build-web: $(wildcard $(TELEGRAM_BOT_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
+	@docker build -t lattots/piikki-web -f ./cicd/web_app/Dockerfile .
+
+run-web: build-web
+	@docker run -d --network="host" --name web-app-container lattots/piikki-web
+
+stop-web:
+	@docker stop web-app-container
+
+clean-web: stop-web
+	@docker rm web-app-container
+
+log-web:
+	@docker logs web-app-container
+
+deploy-web: build-web
+	@docker push lattots/piikki-web:latest
+
+.PHONY: run-bot stop-bot clean-bot log-bot deploy-bot
+
+build-bot: $(wildcard $(TELEGRAM_BOT_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
+	@docker build -t lattots/piikki-bot -f ./cicd/telegram_bot/Dockerfile .
+
+run-bot: build-bot
+	@docker run -d --network="host" --name telegram-bot-container lattots/piikki-bot
+
+stop-bot:
+	@docker stop telegram-bot-container
+
+clean-bot: stop-bot
+	@docker rm telegram-bot-container
+
+log-bot:
+	@docker logs telegram-bot-container
+
+deploy-bot: build-bot
+	@docker push lattots/piikki-bot:latest
 
 .PHONY: manager
 manager: $(MANAGER_BIN)
@@ -57,9 +84,3 @@ remind: $(REMINDER_BIN)
 .PHONY: clean
 clean:
 	rm -rf $(BIN_DIR)/*
-
-# Production run
-.PHONY: prod
-prod: all
-	$(TELEGRAM_BOT_BIN) &
-	$(WEB_APP_BIN) &

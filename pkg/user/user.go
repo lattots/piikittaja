@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/lattots/piikittaja/pkg/transaction"
 	"os"
+
+	"github.com/lattots/piikittaja/pkg/transaction"
 )
 
 type User struct {
