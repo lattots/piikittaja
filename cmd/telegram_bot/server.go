@@ -299,12 +299,12 @@ func createAnimation(amount, transactionId int) error {
 	if err != nil {
 		return fmt.Errorf("error creating tmp directory: %w", err)
 	}
-	
+
 	backgroundFilename := fmt.Sprintf("./assets/telegram_bot/%d€.gif", amount)
 	outputFilename := fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId)
 	fontFilename := "./assets/telegram_bot/Raleway-Black.ttf"
 
-	err := gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
+	err = gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
 	return err
 }
 
