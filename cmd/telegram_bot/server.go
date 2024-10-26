@@ -76,59 +76,54 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	receivedMessage := update.Message.Text
 
 	amount, err := getAmount(receivedMessage)
-
-	var response string
 	// if function errors, the message is not an amount, and it should be handled as unknown command
 	// if function doesn't error, amount exists, and it should be handled as new tab
-	if err == nil {
-		usr, err := user.NewUser(int(sender.ID), sender.Username)
-		if err != nil {
-			log.Fatalln(err)
-		}
 
-		transactionId, err := usr.AddToTab(amount)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		err = createAnimation(amount, transactionId)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		params, err := getSendAnimationParams(update, transactionId)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		_, err = b.SendAnimation(ctx, params)
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		err = os.Remove(fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId))
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		balance, err := usr.GetBalance()
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		response = fmt.Sprintf("Saldosi on nyt %d€", balance)
-	} else {
-		response = "En ymmärtänyt tuota. Kirjoita /apua saadaksesi apua."
-	}
-
-	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   response,
-	})
 	if err != nil {
-		log.Fatalln("error sending message:\n", err)
+		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "En ymmärtänyt tuota. Kirjoita /apua saadaksesi apua.",
+		})
+		if err != nil {
+			log.Fatalln("error sending message:\n", err)
+		}
+		return
 	}
 
+	usr, err := user.NewUser(int(sender.ID), sender.Username)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	transactionId, err := usr.AddToTab(amount)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = createAnimation(amount, transactionId)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	userBalance, err := usr.GetBalance()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	params, err := getSendAnimationParams(update, transactionId, userBalance)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = b.SendAnimation(ctx, params)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = os.Remove(fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId))
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func handleStart(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -310,7 +305,7 @@ func createAnimation(amount, transactionId int) error {
 	return err
 }
 
-func getSendAnimationParams(update *models.Update, transactionId int) (*bot.SendAnimationParams, error) {
+func getSendAnimationParams(update *models.Update, transactionId, userBalance int) (*bot.SendAnimationParams, error) {
 	animationFile, err := os.Open(fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId))
 	if err != nil {
 		return nil, fmt.Errorf("error opening GIF file with ID %d: %s", transactionId, err)
@@ -329,6 +324,7 @@ func getSendAnimationParams(update *models.Update, transactionId int) (*bot.Send
 		Height:    100,
 		Duration:  1,
 		Animation: animation,
+		Caption:   fmt.Sprintf("Saldosi on nyt %d€", userBalance),
 	}
 
 	return params, nil
