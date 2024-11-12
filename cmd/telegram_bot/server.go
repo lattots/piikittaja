@@ -51,6 +51,10 @@ func main() {
 		Description: "Terve!",
 	})
 	commands = append(commands, models.BotCommand{
+		Command:     "/maksaminen",
+		Description: "Maksuohjeet.",
+	})
+	commands = append(commands, models.BotCommand{
 		Command:     "/apua",
 		Description: "Apua!",
 	})
@@ -63,6 +67,7 @@ func main() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/piikkaa", bot.MatchTypeExact, handleGetAmountInput)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/piikki", bot.MatchTypeExact, handleGetTab)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/terve", bot.MatchTypeExact, handleGreet)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/maksaminen", bot.MatchTypeExact, handlePaymentInfo)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/apua", bot.MatchTypeExact, handleHelp)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/help", bot.MatchTypeExact, handleHelp)
 
@@ -213,6 +218,18 @@ func handleHelp(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 }
 
+func handlePaymentInfo(ctx context.Context, b *bot.Bot, update *models.Update) {
+	params, err := getSendPhotoParams(update)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = b.SendPhoto(ctx, params)
+	if err != nil {
+		log.Fatalln("error sending message:", err)
+	}
+}
+
 func getAmount(s string) (int, error) {
 	re := regexp.MustCompile(`^\d+`)
 	match := re.FindString(s)
@@ -325,6 +342,37 @@ func getSendAnimationParams(update *models.Update, transactionId, userBalance in
 		Duration:  1,
 		Animation: animation,
 		Caption:   fmt.Sprintf("Saldosi on nyt %d€", userBalance),
+	}
+
+	return params, nil
+}
+
+func getSendPhotoParams(update *models.Update) (*bot.SendPhotoParams, error) {
+	msg := "Vai että maksun aika lähestyy...\n\n" +
+		"Näin se tapahtuu:\n" +
+		"1. Saavu kiltahuoneelle rahat mukanasi\n" +
+		"2. Etsi kuvien perusteella postilaatikko ja kirjekuori\n" +
+		"3. Sujauta rahat kirjekuoreen ja kirjoita Telegram-käyttäjäsi kuoreen\n" +
+		"4. Tiputa kirjekuori postilaatikkoon ja kumarra/niiaa kolmesti\n\n" +
+		"Kuten arvata saattaa, maksun käsittelyssä menee joitain päiviä. " +
+		"Älä siis hätäile, vaikka piikkisi ei välittömästi kuittaudu maksetuksi."
+
+	photoFile, err := os.Open("./assets/telegram_bot/payment.png")
+	if err != nil {
+		return nil, fmt.Errorf("error opening photo file %w", err)
+	}
+
+	reader := bufio.NewReader(photoFile)
+
+	photo := &models.InputFileUpload{
+		Filename: "payment",
+		Data:     reader,
+	}
+
+	params := &bot.SendPhotoParams{
+		ChatID:  update.Message.Chat.ID,
+		Photo:   photo,
+		Caption: msg,
 	}
 
 	return params, nil
