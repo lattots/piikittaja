@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/markbates/goth/gothic"
 )
@@ -58,6 +59,14 @@ func (h *Handler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	filterCookies(w)
+
+	for name, values := range w.Header() {
+		for _, value := range values {
+			log.Printf("4th Header: %s: %s\n", name, value)
+		}
+	}
+
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
@@ -72,4 +81,24 @@ func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+}
+
+// Function to filter out _gothic cookies from the response
+func filterCookies(w http.ResponseWriter) {
+	// Get the current cookies
+	cookies := w.Header().Values("Set-Cookie")
+	var filteredCookies []string
+
+	// Iterate through the cookies and filter out those starting with an underscore
+	for _, cookie := range cookies {
+		if !strings.HasPrefix(cookie, "_gothic") {
+			filteredCookies = append(filteredCookies, cookie)
+		}
+	}
+
+	// Clear out the current cookies and add the filtered ones back
+	w.Header().Del("Set-Cookie")
+	for _, cookie := range filteredCookies {
+		w.Header().Add("Set-Cookie", cookie)
+	}
 }
