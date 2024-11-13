@@ -26,6 +26,12 @@ func (h *Handler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 	provider := r.PathValue("provider")
 	r = r.WithContext(context.WithValue(r.Context(), "provider", provider))
 
+	for name, values := range w.Header() {
+		for _, value := range values {
+			log.Printf("1st Header: %s: %s\n", name, value)
+		}
+	}
+
 	usr, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
 		_, err = fmt.Fprintln(w, err)
@@ -35,6 +41,12 @@ func (h *Handler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for name, values := range w.Header() {
+		for _, value := range values {
+			log.Printf("2nd Header: %s: %s\n", name, value)
+		}
+	}
+
 	err = h.Auth.SaveSession(w, r, usr)
 	if err != nil {
 		log.Println(err)
@@ -42,7 +54,7 @@ func (h *Handler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 
 	for name, values := range w.Header() {
 		for _, value := range values {
-			log.Printf("Header: %s: %s\n", name, value)
+			log.Printf("3rd Header: %s: %s\n", name, value)
 		}
 	}
 
