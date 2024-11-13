@@ -18,6 +18,8 @@ RUN go build -o /bin/web-app ./cmd/web_app/server.go
 # Final image for web app using Debian
 FROM debian:12
 
+RUN apt-get update && apt-get install -y ca-certificates
+
 # Copy the binary from the builder stage
 COPY --from=builder /bin/web-app /usr/local/bin/web-app
 COPY ./assets/.env ./assets/.env
