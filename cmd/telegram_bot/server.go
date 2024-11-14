@@ -48,7 +48,7 @@ func main() {
 	})
 	commands = append(commands, models.BotCommand{
 		Command:     "/terve",
-		Description: "Terve!",
+		Description: "Tevre!",
 	})
 	commands = append(commands, models.BotCommand{
 		Command:     "/maksaminen",
@@ -206,6 +206,7 @@ func handleHelp(ctx context.Context, b *bot.Bot, update *models.Update) {
 		"/piikki: Nähdäksesi nykyisen piikkisi.\n" +
 		"/piikkaa: Lisätäksesi haluamasi summa piikkiin.\n" +
 		"/terve: Tervehtiäksesi PiikkiBottia.\n" +
+		"/maksaminen: Saadaksesi maksuun liittyvät ohjeet.\n" +
 		"/apua: Saadaksesi apua."
 
 	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
