@@ -12,11 +12,7 @@ REMINDER_SRC_DIR := cmd/reminder
 MANAGER_SRC_DIR := cmd/admin_manager
 
 # Default target
-all: $(REMINDER_BIN) $(MANAGER_BIN)
-
-$(REMINDER_BIN): $(wildcard $(REMINDER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
-	mkdir -p $(BIN_DIR)
-	go build -o $@ $(REMINDER_SRC_DIR)/reminder.go
+all: $(MANAGER_BIN)
 
 $(MANAGER_BIN): $(wildcard $(MANAGER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	mkdir -p $(BIN_DIR)
@@ -31,6 +27,9 @@ compose-up:
 	@docker compose -f ./cicd/compose.yaml up -d
 
 compose-down: clean-bot clean-web
+
+# ---
+# Web app commands
 
 .PHONY: run-web stop-web clean-web log-web deploy-web
 
@@ -52,6 +51,9 @@ log-web:
 deploy-web: build-web
 	@docker push lattots/piikki-web:latest
 
+# ---
+# Telegram bot commands
+
 .PHONY: run-bot stop-bot clean-bot log-bot deploy-bot
 
 build-bot: $(wildcard $(TELEGRAM_BOT_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
@@ -72,13 +74,34 @@ log-bot:
 deploy-bot: build-bot
 	@docker push lattots/piikki-bot:latest
 
+# ---
+# Admin manager commands
+
 .PHONY: manager
 manager: $(MANAGER_BIN)
 	$(MANAGER_BIN)
 
-.PHONY: remind
-remind: $(REMINDER_BIN)
-	$(REMINDER_BIN)
+# ---
+# Payment reminder commands
+
+.PHONY: remind run-reminder clean-reminder log-reminder deploy-reminder
+
+remind: stop-bot run-reminder compose-up
+
+build-reminder: $(wildcard $(REMINDER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
+	@docker build -t lattots/piikki-reminder -f ./cicd/reminder/Dockerfile .
+
+run-reminder: build-reminder
+	@docker run -d --network="host" --name reminder-container lattots/piikki-reminder
+
+clean-reminder:
+	@docker rm reminder-container
+
+log-reminder:
+	@docker logs reminder-container
+
+deploy-reminder: build-reminder
+	@docker push lattots/piikki-reminder:latest
 
 # Clean up binaries
 .PHONY: clean

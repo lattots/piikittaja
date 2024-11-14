@@ -47,3 +47,9 @@ jobs:
 
       - name: Deploy Web App
         run: make deploy-web
+
+      - name: Build Reminder
+        run: make build-reminder
+
+      - name: Deploy Reminder
+        run: make deploy-reminder
