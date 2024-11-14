@@ -48,7 +48,8 @@ func main() {
 			msg := fmt.Sprintf(
 				"Hei, %s! On käynyt ilmi, että sitä on rilluteltu, jonka seurauksena saldo on päässyt pakkaselle. "+
 					"Maksathan velkasi ensitilassa IE:lle.\n\nNykyinen saldosi: %d\n\n"+
-					"Velka on helpointa maksaa ottamalla sopiva rahasumma mukaan seuraavan kerran, kun luulet tapaavasi toista IE:tä. "+
+					"Paatuneelta piikittäjältä maksaminen sujuu varmasti jo kuin tanssi, mutta muiden kohdalla suosittelen "+
+					"kääntymään ohjeistuksen puoleen komennolla /maksaminen. "+
 					"Saldoa on myös mahdollista kerryttää etukäteen, jos luulet, että lähitulevaisuudessa korkki taas aukeaa...",
 				u.Username,
 				u.Balance,
