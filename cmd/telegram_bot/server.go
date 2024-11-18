@@ -100,6 +100,11 @@ func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		log.Fatalln(err)
 	}
 
+	err = usr.UpdateUsername()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	transactionId, err := usr.AddToTab(amount)
 	if err != nil {
 		log.Fatalln(err)
@@ -160,6 +165,11 @@ func handleGetAmountInput(ctx context.Context, b *bot.Bot, update *models.Update
 func handleGetTab(ctx context.Context, b *bot.Bot, update *models.Update) {
 	sender := update.Message.From
 	u, err := user.NewUser(int(sender.ID), sender.Username)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = u.UpdateUsername()
 	if err != nil {
 		log.Fatalln(err)
 	}

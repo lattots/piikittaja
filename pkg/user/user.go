@@ -128,6 +128,14 @@ func (u *User) PayBackTab(amount int) (int, error) {
 	return transaction.New(u.db, u.ID, amount)
 }
 
+func (u *User) UpdateUsername() error {
+	_, err := u.db.Exec("UPDATE users SET username=? WHERE id=?", u.Username, u.ID)
+	if err != nil {
+		return fmt.Errorf("failed to update username: %w", err)
+	}
+	return nil
+}
+
 func GetUsers(db *sql.DB) ([]User, error) {
 	rows, err := db.Query("SELECT * FROM users")
 	if err != nil {
