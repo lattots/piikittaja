@@ -91,8 +91,13 @@ remind: stop-bot run-reminder compose-up
 build-reminder: $(wildcard $(REMINDER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	@docker build -t lattots/piikki-reminder -f ./cicd/reminder/Dockerfile .
 
+<<<<<<< Updated upstream
 run-reminder: build-reminder
 	@docker run -d --network="host" --name reminder-container lattots/piikki-reminder
+=======
+run-reminder:
+	@docker run -d --pull always --network="host" --name reminder-container lattots/piikki-reminder
+>>>>>>> Stashed changes
 
 clean-reminder:
 	@docker rm reminder-container

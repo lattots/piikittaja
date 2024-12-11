@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -44,7 +45,7 @@ func main() {
 
 	for _, u := range users {
 		if u.Balance < 0 {
-			fmt.Println("Sending message...")
+			fmt.Printf("Sending message to %s...", u.Username)
 			msg := fmt.Sprintf(
 				"Hei, %s! On käynyt ilmi, että sitä on rilluteltu, jonka seurauksena saldo on päässyt pakkaselle. "+
 					"Maksathan velkasi ensitilassa IE:lle.\n\nNykyinen saldosi: %d\n\n"+
@@ -55,11 +56,12 @@ func main() {
 				u.Balance,
 			)
 			err := u.SendMessage(b, msg)
-			if err != nil {
+			if errors.Is(bot.ErrorForbidden, err) {
+				log.Printf("User: %s has probably blocked PiikkiBotti...\nError: %s\n", u.Username, err.Error())
+			} else if err != nil {
 				log.Fatalln(err)
 			}
 		}
 	}
 	fmt.Println("Payment reminders sent!")
-
 }
