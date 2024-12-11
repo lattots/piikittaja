@@ -14,7 +14,7 @@ func (u *User) SendMessage(b *bot.Bot, msg string) error {
 		Text:   msg,
 	})
 	if err != nil {
-		return fmt.Errorf("error sending message: %v\n", err)
+		return fmt.Errorf("error sending message: %w\n", err)
 	}
 	return nil
 }
