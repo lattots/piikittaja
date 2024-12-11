@@ -59,7 +59,7 @@ func main() {
 			if errors.Is(bot.ErrorForbidden, err) {
 				log.Printf("User: %s has probably blocked PiikkiBotti...\nError: %s\n", u.Username, err.Error())
 			} else if err != nil {
-				log.Fatalln("fatal error while sending messages", err)
+				log.Printf("fatal error while sending message to %s: %s\n", u.Username, err.Error())
 			}
 		}
 	}
