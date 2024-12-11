@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -55,11 +56,12 @@ func main() {
 				u.Balance,
 			)
 			err := u.SendMessage(b, msg)
-			if err != nil {
+			if errors.Is(bot.ErrorForbidden, err) {
+				log.Printf("User: %s has probably blocked PiikkiBotti...\nError: %s\n", u.Username, err.Error())
+			} else if err != nil {
 				log.Fatalln(err)
 			}
 		}
 	}
 	fmt.Println("Payment reminders sent!")
-
 }

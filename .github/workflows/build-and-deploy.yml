@@ -53,3 +53,9 @@ jobs:
 
       - name: Deploy Reminder
         run: make deploy-reminder
+
+      - name: Build Admin Manager
+        run: make build-manager
+
+      - name: Deploy Admin Manager
+        run: make deploy-manager

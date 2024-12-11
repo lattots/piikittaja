@@ -60,9 +60,14 @@ func main() {
 			}
 		case "add":
 			email := getEmail(reader)
-			err = adminDB.AddAdmin(email)
-			if err != nil {
-				log.Fatalln("error adding admin to database: %w", err)
+			if adminDB.IsAdmin(email) {
+				fmt.Println("User is already an admin")
+			} else {
+				err = adminDB.AddAdmin(email)
+				if err != nil {
+					log.Fatalln("error adding admin to database: %w", err)
+				}
+				fmt.Printf("Successfully added %s to admin database!\n", email)
 			}
 		case "remove":
 			email := getEmail(reader)
@@ -70,8 +75,14 @@ func main() {
 			if err != nil {
 				log.Fatalln("error removing admin from database: %w", err)
 			}
+		case "help":
+			fmt.Println("Welcome to the admin manager!\n\n" +
+				"\"exit\": Exit the program\n" +
+				"\"check\": To check if email is already an admin\n" +
+				"\"add\": Add email to list of admins\n" +
+				"\"remove\": Remove email from list of admins\n")
 		default:
-			fmt.Println("Invalid command")
+			fmt.Println("Invalid command. Try \"help\" for instructions")
 		}
 	}
 }
