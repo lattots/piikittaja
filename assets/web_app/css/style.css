@@ -114,7 +114,7 @@ th {
     vertical-align: middle;
 }
 
-tr:hover {
+#user-view-entry:hover {
     background-color: lightgrey;
     border-radius: 20px;
 }

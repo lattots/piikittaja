@@ -51,10 +51,10 @@
     <input type="text" name="username" id="username-input" placeholder="Käyttäjänimi" /><br>
     <label for="amount-input"></label>
     <input type="text" name="amount" id="amount-input" placeholder="€€€" /><br>
-    <input type="radio" id="pay" name="action-type" value="pay">
-    <label for="pay">MAKSA</label>
-    <input type="radio" id="borrow" name="action-type" value="borrow">
-    <label for="borrow">LAINAA</label><br>
+    <input type="radio" id="deposit" name="action-type" value="deposit">
+    <label for="deposit">TALLETA</label>
+    <input type="radio" id="withdraw" name="action-type" value="withdraw">
+    <label for="withdraw">NOSTA</label><br>
     <button id="submit-action" type="submit">TOTEUTA</button>
 </form>
 </div>
@@ -79,7 +79,7 @@
 
 {{ block "single-user-view" . }}
 
-<tr>
+<tr id="user-view-entry">
     <td>{{ .ID }}</td>
     <td>{{ .Username }}</td>
     <td>{{ .Balance }}</td>
