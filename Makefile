@@ -27,7 +27,7 @@ build-web: $(wildcard $(TELEGRAM_BOT_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	@docker build -t lattots/piikki-web -f ./cicd/web_app/Dockerfile .
 
 run-web: build-web
-	@docker run -d --rm --network="host" --name web-app-container lattots/piikki-web
+	@docker run -d --network="host" --name web-app-container lattots/piikki-web
 
 stop-web:
 	@docker stop web-app-container
@@ -50,7 +50,7 @@ build-bot: $(wildcard $(TELEGRAM_BOT_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	@docker build -t lattots/piikki-bot -f ./cicd/telegram_bot/Dockerfile .
 
 run-bot: build-bot
-	@docker run -d --rm --network="host" --name telegram-bot-container lattots/piikki-bot
+	@docker run -d --network="host" --name telegram-bot-container lattots/piikki-bot
 
 stop-bot:
 	@docker stop telegram-bot-container

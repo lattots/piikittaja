@@ -16,6 +16,20 @@ type User struct {
 	db       *sql.DB
 }
 
+type ErrNotEnoughBalance struct {
+	Message string
+}
+
+func (e *ErrNotEnoughBalance) Error() string {
+	return e.Message
+}
+
+func (e *ErrNotEnoughBalance) Is(err error) bool {
+	// This allows comparison with errors.Is
+	var other *ErrNotEnoughBalance
+	return errors.As(err, &other)
+}
+
 // NewUser returns pointer to user instance. Function will fetch all
 // user information from database or create a new user entry to database.
 func NewUser(id int, username string) (*User, error) {
@@ -98,7 +112,7 @@ func (u *User) GetUsername() (string, error) {
 	return username, nil
 }
 
-// GetBalance returns the current tab of the user.
+// GetBalance returns the current balance of the user.
 func (u *User) GetBalance() (int, error) {
 	row := u.db.QueryRow("SELECT balance FROM users WHERE id=?", u.ID)
 
@@ -114,18 +128,19 @@ func (u *User) GetBalance() (int, error) {
 	return balance, nil
 }
 
-// AddToTab adds the amount to the user's tab. Returns the transaction ID and an error.
-func (u *User) AddToTab(amount int) (int, error) {
-	// Tabs are represented as negative balances in the database.
-	// When adding to the tab, the amount is subtracted from current balance.
-	return transaction.New(u.db, u.ID, -amount)
+// Deposit adds the amount to the users balance. Returns the transaction ID and an error.
+func (u *User) Deposit(amount int) (int, error) {
+	return transaction.New(u.db, u.ID, amount)
 }
 
-// PayBackTab subtracts the amount from user's tab. Returns the transaction ID and an error.
-func (u *User) PayBackTab(amount int) (int, error) {
-	// Tabs are represented as negative balances in the database.
-	// When paying back the tab, the amount is added to current balance.
-	return transaction.New(u.db, u.ID, amount)
+// Withdraw subtracts the amount from user's balance. Returns the transaction ID and an error.
+func (u *User) Withdraw(amount int) (int, error) {
+	if balance, err := u.GetBalance(); err != nil {
+		return 0, err
+	} else if balance < amount {
+		return 0, &ErrNotEnoughBalance{Message: "User doesn't have enough balance to withdraw this amount"}
+	}
+	return transaction.New(u.db, u.ID, -amount)
 }
 
 func (u *User) UpdateUsername() error {
