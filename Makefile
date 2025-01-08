@@ -1,10 +1,3 @@
-# Directories and binaries
-BIN_DIR := bin
-TELEGRAM_BOT_BIN := $(BIN_DIR)/telegram_bot
-WEB_APP_BIN := $(BIN_DIR)/web_app
-REMINDER_BIN := $(BIN_DIR)/reminder
-MANAGER_BIN := $(BIN_DIR)/manager
-
 # Source directories (assuming all related Go files are under these directories)
 TELEGRAM_BOT_SRC_DIR := cmd/telegram_bot
 WEB_APP_SRC_DIR := cmd/web_app
@@ -73,7 +66,7 @@ build-manager: $(wildcard $(MANAGER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	@docker build -t lattots/piikki-manager -f ./cicd/admin_manager/Dockerfile .
 
 run-manager:
-	@docker run --rm --pull always --network="host" --name manager-container lattots/piikki-manager
+	@docker run -it --rm --pull always --network="host" --name manager-container lattots/piikki-manager
 
 clean-manager:
 	@docker rm manager-container
@@ -105,8 +98,3 @@ log-reminder:
 
 deploy-reminder: build-reminder
 	@docker push lattots/piikki-reminder:latest
-
-# Clean up binaries
-.PHONY: clean
-clean:
-	rm -rf $(BIN_DIR)/*
