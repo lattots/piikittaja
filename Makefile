@@ -66,7 +66,7 @@ build-manager: $(wildcard $(MANAGER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
 	@docker build -t lattots/piikki-manager -f ./cicd/admin_manager/Dockerfile .
 
 run-manager:
-	@docker run --rm --pull always --network="host" --name manager-container lattots/piikki-manager
+	@docker run -it --rm --pull always --network="host" --name manager-container lattots/piikki-manager
 
 clean-manager:
 	@docker rm manager-container
