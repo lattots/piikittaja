@@ -31,7 +31,7 @@ func (h *Handler) HandleUserView(w http.ResponseWriter, r *http.Request) {
 
 	users := make([]user.User, 0)
 
-	userFilter := r.URL.Query().Get("filter")
+	userFilter := r.URL.Query().Get("username")
 
 	if userFilter == "" {
 		var err error

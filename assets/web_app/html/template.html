@@ -54,7 +54,7 @@
            placeholder="Käyttäjänimi"
            hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
            hx-get="/user-view"
-           hx-vals='{"filter": this.value}'
+           hx-vals='{"username": this.value}'
            hx-target="#user-view-entry-container"
            hx-indicator=".search-indicator" /><br>
     <label for="amount-input"></label>
