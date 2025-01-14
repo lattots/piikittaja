@@ -53,7 +53,7 @@
            id="username-input"
            placeholder="Käyttäjänimi"
            hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
-           hx-get="/user-view?filter={filter}"
+           hx-get="/user-view"
            hx-vals='{"filter": this.value}'
            hx-target="#user-view-entry-container"
            hx-indicator=".search-indicator" /><br>
