@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/lattots/piikittaja/pkg/transaction"
@@ -174,17 +173,14 @@ func GetUsers(db *sql.DB) ([]User, error) {
 }
 
 func SearchUsers(db *sql.DB, searchTerm string) ([]User, error) {
-	log.Printf("Searching with %s\n", searchTerm)
-	searchTerm = fmt.Sprintf(searchTerm, "*")
+	searchTermFormatted := fmt.Sprintf("%%%s%%", searchTerm)
 	query := `
 		SELECT *
 		FROM users
-		WHERE MATCH (username) AGAINST (? IN BOOLEAN MODE)
-		ORDER BY 
-			MATCH (username) AGAINST (? IN BOOLEAN MODE) DESC,
-			username ASC
+		WHERE username LIKE ?
+		ORDER BY username ASC
     `
-	rows, err := db.Query(query, searchTerm, searchTerm)
+	rows, err := db.Query(query, searchTermFormatted, searchTermFormatted)
 	if err != nil {
 		return nil, err
 	}
