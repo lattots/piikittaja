@@ -178,9 +178,8 @@ func SearchUsers(db *sql.DB, searchTerm string) ([]User, error) {
 		SELECT *
 		FROM users
 		WHERE username LIKE ?
-		ORDER BY username ASC
     `
-	rows, err := db.Query(query, searchTermFormatted, searchTermFormatted)
+	rows, err := db.Query(query, searchTermFormatted)
 	if err != nil {
 		return nil, err
 	}
