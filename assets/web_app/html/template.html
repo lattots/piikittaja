@@ -48,7 +48,15 @@
 
 <form hx-post="/action" hx-swap="innerHTML" hx-target="#form-container">
     <label for="username-input"></label>
-    <input type="text" name="username" id="username-input" placeholder="Käyttäjänimi" /><br>
+    <input type="text"
+           name="username"
+           id="username-input"
+           placeholder="Käyttäjänimi"
+           hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+           hx-get="/user-view?filter={filter}"
+           hx-vals='{"filter": this.value}'
+           hx-target="#user-view-entry-container"
+           hx-indicator=".search-indicator" /><br>
     <label for="amount-input"></label>
     <input type="text" name="amount" id="amount-input" placeholder="€€€" /><br>
     <input type="radio" id="pay" name="action-type" value="pay">
@@ -63,7 +71,7 @@
 
 {{ block "user-view" . }}
 
-<table id="user-view-table" hx-trigger="load, every 3s, newUserAction from:body" hx-get="/user-view"
+<table id="user-view-table" hx-trigger="load, newUserAction from:body" hx-get="/user-view"
        hx-target="#user-view-entry-container" hx-swap="innerHTML">
     <thead>
         <tr>

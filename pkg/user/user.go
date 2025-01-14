@@ -157,6 +157,33 @@ func GetUsers(db *sql.DB) ([]User, error) {
 	return users, nil
 }
 
+func SearchUsers(db *sql.DB, searchTerm string) ([]User, error) {
+	query := `
+        SELECT *
+        FROM users
+        WHERE MATCH (username) AGAINST (?* IN BOOLEAN MODE)
+        ORDER BY MATCH (username) AGAINST (?* IN BOOLEAN MODE) DESC, username ASC
+    `
+	rows, err := db.Query(query, searchTerm, searchTerm)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []User
+
+	for rows.Next() {
+		var user User
+		err := rows.Scan(&user.ID, &user.Username, &user.Balance)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
 func GetUserByUsername(db *sql.DB, username string) (*User, error) {
 	row := db.QueryRow("SELECT id FROM users WHERE username=?", username)
 
