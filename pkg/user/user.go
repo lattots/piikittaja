@@ -160,6 +160,7 @@ func GetUsers(db *sql.DB) ([]User, error) {
 
 func SearchUsers(db *sql.DB, searchTerm string) ([]User, error) {
 	log.Printf("Searching with %s\n", searchTerm)
+	searchTerm = fmt.Sprintf(searchTerm, "*")
 	query := `
 		SELECT *
 		FROM users
