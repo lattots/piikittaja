@@ -176,8 +176,8 @@ func SearchUsers(db *sql.DB, searchTerm string) ([]User, error) {
 	query := `
         SELECT *
         FROM users
-        WHERE MATCH (username) AGAINST (?* IN BOOLEAN MODE)
-        ORDER BY MATCH (username) AGAINST (?* IN BOOLEAN MODE) DESC, username ASC
+        WHERE MATCH (username) AGAINST (? IN BOOLEAN MODE)
+        ORDER BY MATCH (username) AGAINST (? IN BOOLEAN MODE) DESC, username ASC
     `
 	rows, err := db.Query(query, searchTerm, searchTerm)
 	if err != nil {
