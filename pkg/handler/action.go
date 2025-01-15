@@ -40,10 +40,10 @@ func (h *Handler) HandleUserAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if action == "borrow" {
-		_, err = usr.AddToTab(amount)
-	} else if action == "pay" {
-		_, err = usr.PayBackTab(amount)
+	if action == "withdraw" {
+		_, err = usr.Withdraw(amount)
+	} else if action == "deposit" {
+		_, err = usr.Deposit(amount)
 	} else {
 		log.Println("unknown action", err)
 		http.Error(w, "unknown action", http.StatusBadRequest)

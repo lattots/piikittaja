@@ -48,13 +48,21 @@
 
 <form hx-post="/action" hx-swap="innerHTML" hx-target="#form-container">
     <label for="username-input"></label>
-    <input type="text" name="username" id="username-input" placeholder="Käyttäjänimi" /><br>
+    <input type="text"
+           name="username"
+           id="username-input"
+           placeholder="Käyttäjänimi"
+           hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+           hx-get="/user-view"
+           hx-vals='{"username": this.value}'
+           hx-target="#user-view-entry-container"
+           hx-indicator=".search-indicator" /><br>
     <label for="amount-input"></label>
     <input type="text" name="amount" id="amount-input" placeholder="€€€" /><br>
-    <input type="radio" id="pay" name="action-type" value="pay">
-    <label for="pay">MAKSA</label>
-    <input type="radio" id="borrow" name="action-type" value="borrow">
-    <label for="borrow">LAINAA</label><br>
+    <input type="radio" id="deposit" name="action-type" value="deposit">
+    <label for="deposit">TALLETA</label>
+    <input type="radio" id="withdraw" name="action-type" value="withdraw">
+    <label for="withdraw">NOSTA</label><br>
     <button id="submit-action" type="submit">TOTEUTA</button>
 </form>
 </div>
@@ -63,7 +71,7 @@
 
 {{ block "user-view" . }}
 
-<table id="user-view-table" hx-trigger="load, every 3s, newUserAction from:body" hx-get="/user-view"
+<table id="user-view-table" hx-trigger="load, newUserAction from:body" hx-get="/user-view"
        hx-target="#user-view-entry-container" hx-swap="innerHTML">
     <thead>
         <tr>
@@ -79,7 +87,7 @@
 
 {{ block "single-user-view" . }}
 
-<tr>
+<tr id="user-view-entry">
     <td>{{ .ID }}</td>
     <td>{{ .Username }}</td>
     <td>{{ .Balance }}</td>
