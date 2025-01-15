@@ -17,4 +17,4 @@ RUN go build -o /bin/messenger ./cmd/messenger/messenger.go
 COPY ./assets/.env ./assets/.env
 
 # Run the built binary
-CMD ["messager"]
+CMD ["messenger"]
