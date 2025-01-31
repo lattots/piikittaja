@@ -179,6 +179,33 @@ func GetUsers(db *sql.DB) ([]User, error) {
 	return users, nil
 }
 
+func SearchUsers(db *sql.DB, searchTerm string) ([]User, error) {
+	searchTermFormatted := fmt.Sprintf("%%%s%%", searchTerm)
+	query := `
+		SELECT *
+		FROM users
+		WHERE username LIKE ?
+    `
+	rows, err := db.Query(query, searchTermFormatted)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []User
+
+	for rows.Next() {
+		var user User
+		err := rows.Scan(&user.ID, &user.Username, &user.Balance)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
 func GetUserByUsername(db *sql.DB, username string) (*User, error) {
 	row := db.QueryRow("SELECT id FROM users WHERE username=?", username)
 

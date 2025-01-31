@@ -29,11 +29,26 @@ func (h *Handler) HandleUserView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := user.GetUsers(h.DB)
-	if err != nil {
-		log.Println("error fetching users from db", err)
-		http.Error(w, "error fetching users", http.StatusInternalServerError)
-		return
+	users := make([]user.User, 0)
+
+	userFilter := r.URL.Query().Get("username")
+
+	if userFilter == "" {
+		var err error
+		users, err = user.GetUsers(h.DB)
+		if err != nil {
+			log.Println("error fetching users from db", err)
+			http.Error(w, "error fetching users", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		var err error
+		users, err = user.SearchUsers(h.DB, userFilter)
+		if err != nil {
+			log.Println("error fetching users from db", err)
+			http.Error(w, "error fetching users", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	for _, u := range users {

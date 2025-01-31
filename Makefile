@@ -3,6 +3,7 @@ TELEGRAM_BOT_SRC_DIR := cmd/telegram_bot
 WEB_APP_SRC_DIR := cmd/web_app
 REMINDER_SRC_DIR := cmd/reminder
 MANAGER_SRC_DIR := cmd/admin_manager
+MESSENGER_SRC_DIR := cmd/messenger
 
 # Runs docker compose that spins up containers with "piikki-web" and "piikki-bot" images from Docker Hub
 # Images need to be pushed to the repository before running this
@@ -98,3 +99,25 @@ log-reminder:
 
 deploy-reminder: build-reminder
 	@docker push lattots/piikki-reminder:latest
+
+# ---
+# User messenger commands
+
+.PHONY: messenger run-messenger clean-messenger log-messenger deploy-messenger
+
+messenger: stop-bot run-messenger compose-up
+
+build-messenger: $(wildcard $(MESSENGER_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
+	@docker build -t lattots/piikki-messenger -f ./cicd/messenger/Dockerfile .
+
+run-messenger:
+	@docker run -d --pull always --network="host" --name messenger-container lattots/piikki-messenger
+
+clean-messenger:
+	@docker rm messenger-container
+
+log-messenger:
+	@docker logs messenger-container
+
+deploy-messenger: build-messenger
+	@docker push lattots/piikki-messenger:latest

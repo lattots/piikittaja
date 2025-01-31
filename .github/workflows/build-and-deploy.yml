@@ -59,3 +59,9 @@ jobs:
 
       - name: Deploy Admin Manager
         run: make deploy-manager
+
+      - name: Build Messenger
+        run: make build-messenger
+
+      - name: Deploy Messenger
+        run: make deploy-messenger

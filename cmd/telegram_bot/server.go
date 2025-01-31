@@ -148,7 +148,8 @@ func handleStart(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	msg := fmt.Sprintf(
 		"Hyvää päivää, %s. Olet avannut PiikkiBotin. Onnittelut erinomaisesta valinnasta!\n\n"+
-			"Olet sitten kokenut piikittäjä tai portista astuva noviisi, saat apua kirjoittamalla /apua",
+			"Olet sitten kokenut piikittäjä tai portista astuva noviisi, saat apua kirjoittamalla /apua\n\n"+
+			"PiikkiBotti toimii kuin henkilökohtainen pankkitili, jolle voit tallettaa rahaa seuraavasti /maksaminen\n\n",
 		senderUsername,
 	)
 
@@ -220,10 +221,10 @@ func handleGreet(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 func handleHelp(ctx context.Context, b *bot.Bot, update *models.Update) {
 	msg := "Olen PiikkiBotti. Autan killan tärkeimpiä vapaaehtoisia kirjanpitotehtävissä.\n\n" +
-		"/piikki: Nähdäksesi nykyisen piikkisi.\n" +
-		"/piikkaa: Lisätäksesi haluamasi summa piikkiin.\n" +
+		"/piikki: Nähdäksesi nykyisen saldosi.\n" +
+		"/piikkaa: Käyttääksesi saldoasi.\n" +
 		"/terve: Tervehtiäksesi PiikkiBottia.\n" +
-		"/maksaminen: Saadaksesi maksuun liittyvät ohjeet.\n" +
+		"/maksaminen: Saadaksesi rahan tallettamiseen liittyvät ohjeet.\n" +
 		"/apua: Saadaksesi apua."
 
 	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
