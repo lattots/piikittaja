@@ -135,12 +135,19 @@ func (u *User) Deposit(amount int) (int, error) {
 
 // Withdraw subtracts the amount from user's balance. Returns the transaction ID and an error.
 func (u *User) Withdraw(amount int) (int, error) {
-	if balance, err := u.GetBalance(); err != nil {
-		return 0, err
-	} else if balance < amount {
+	if !u.canWithdraw(amount) {
 		return 0, &ErrNotEnoughBalance{Message: "User doesn't have enough balance to withdraw this amount"}
 	}
 	return transaction.New(u.db, u.ID, -amount)
+}
+
+func (u *User) canWithdraw(amount int) bool {
+	balance, err := u.GetBalance()
+	if err != nil {
+		return false
+	}
+	const debtThreshold = 10
+	return amount < balance+debtThreshold
 }
 
 func (u *User) UpdateUsername() error {
