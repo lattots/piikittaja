@@ -147,7 +147,7 @@ func (u *User) canWithdraw(amount int) bool {
 		return false
 	}
 	const debtThreshold = 10
-	return amount < balance+debtThreshold
+	return amount <= balance+debtThreshold
 }
 
 func (u *User) UpdateUsername() error {
