@@ -20,6 +20,8 @@ func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
+
+	filterCookies(w)
 }
 
 func (h *Handler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
