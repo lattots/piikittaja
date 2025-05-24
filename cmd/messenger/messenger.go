@@ -9,17 +9,11 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-telegram/bot"
-	"github.com/joho/godotenv"
 
 	"github.com/lattots/piikittaja/pkg/user"
 )
 
 func main() {
-	err := godotenv.Load("./assets/.env")
-	if err != nil {
-		log.Fatalln("error loading environment variables: ", err)
-	}
-
 	// Database URL is read from environment variables.
 	dbURL := os.Getenv("DATABASE_APP")
 	if dbURL == "" {

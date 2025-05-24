@@ -6,7 +6,6 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-telegram/bot v1.13.3
 	github.com/gorilla/sessions v1.4.0
-	github.com/joho/godotenv v1.5.1
 	github.com/lattots/gipher v1.1.0
 	github.com/markbates/goth v1.80.0
 )

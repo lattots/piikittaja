@@ -121,3 +121,4 @@ log-messenger:
 
 deploy-messenger: build-messenger
 	@docker push lattots/piikki-messenger:latest
+
