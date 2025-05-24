@@ -38,11 +38,10 @@ jobs:
 
       - name: Copy .env To Server
         uses: appleboy/scp-action@master
-        env:
+        with:
           username: ${{ secrets.USERNAME }}
           host: ${{ secrets.HOST }}
           key: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
           source: './deploy/.env'
           target: '/home/${{ secrets.USERNAME }}/piikittaja/deploy/.env'
 
