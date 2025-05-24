@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ENV_FILE="./assets/.env"
+ENV_FILE="./deploy/.env"
 
 # Create or overwrite the .env file
 touch $ENV_FILE
