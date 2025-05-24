@@ -22,7 +22,6 @@ RUN apt-get update && apt-get install -y ca-certificates
 
 # Copy the binary from the builder stage
 COPY --from=builder /bin/telegram-bot /usr/local/bin/telegram-bot
-COPY ./assets/.env ./assets/.env
 COPY ./assets/telegram_bot ./assets/telegram_bot
 
 # Run the built binary

@@ -9,17 +9,11 @@ import (
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 
 	"github.com/lattots/piikittaja/pkg/auth"
 )
 
 func main() {
-	err := godotenv.Load("./assets/.env")
-	if err != nil {
-		log.Fatalln("error loading environment variables: ", err)
-	}
-
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Admin Manager - Manage Access Rights to Piikki Web App")
 

@@ -14,7 +14,5 @@ COPY ./pkg ./pkg
 # Build runnable binary from source
 RUN go build -o /bin/reminder ./cmd/reminder/reminder.go
 
-COPY ./assets/.env ./assets/.env
-
 # Run the built binary
 CMD ["reminder"]

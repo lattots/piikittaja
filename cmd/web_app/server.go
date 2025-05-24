@@ -6,18 +6,12 @@ import (
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 
 	"github.com/lattots/piikittaja/pkg/auth"
 	"github.com/lattots/piikittaja/pkg/handler"
 )
 
 func main() {
-	err := godotenv.Load("./assets/.env")
-	if err != nil {
-		log.Fatalln("error loading environment variables: ", err)
-	}
-
 	router := http.NewServeMux()
 
 	// Serve static files from the 'assets/web_app' directory

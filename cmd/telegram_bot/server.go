@@ -16,18 +16,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
-	"github.com/joho/godotenv"
 	"github.com/lattots/gipher"
 
 	"github.com/lattots/piikittaja/pkg/user"
 )
 
 func main() {
-	err := godotenv.Load("./assets/.env")
-	if err != nil {
-		log.Fatalln("error loading environment variables: ", err)
-	}
-
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 

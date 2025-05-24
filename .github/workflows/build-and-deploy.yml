@@ -36,6 +36,16 @@ jobs:
           HOST_URL: ${{ secrets.HOST_URL }}
           PORT: ${{ secrets.PORT }}
 
+      - name: Copy .env To Server
+        uses: appleboy/scp-action@master
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          HOST: ${{ secrets.HOST }}
+          KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source: './deploy/.env'
+          target: '/home/${{ secrets.USERNAME }}/piikittaja/deploy/.env'
+
       - name: Build Telegram Bot
         run: make build-bot
 
