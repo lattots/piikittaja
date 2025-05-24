@@ -1,9 +1,13 @@
 #!/bin/bash
 
-ENV_FILE="./deploy/.env"
+ENV_DIR="./deploy" # Define the directory
+ENV_FILE="$ENV_DIR/.env"
+
+# Create the directory if it doesn't exist
+mkdir -p "$ENV_DIR"
 
 # Create or overwrite the .env file
-touch $ENV_FILE
+touch "$ENV_FILE"
 
 # Write environment variables to the .env file in one block
 {
@@ -15,4 +19,6 @@ touch $ENV_FILE
   echo "COOKIE_STORE_SECRET=$COOKIE_STORE_SECRET"
   echo "HOST_URL=$HOST_URL"
   echo "PORT=$PORT"
-} >> $ENV_FILE
+} >> "$ENV_FILE"
+
+echo "Successfully created $ENV_FILE"
