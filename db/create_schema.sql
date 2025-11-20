@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS admins (
 );
 
 DELIMITER $$
-CREATE TRIGGER update_user_balance AFTER INSERT ON transactions
+CREATE TRIGGER IF NOT EXISTS update_user_balance AFTER INSERT ON transactions
     FOR EACH ROW
 BEGIN
     -- Update the user's balance
