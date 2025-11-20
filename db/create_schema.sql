@@ -1,9 +1,6 @@
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS transactions;
-
 CREATE TABLE users (
     id BIGINT NOT NULL PRIMARY KEY,
-    username CHAR(255) NOT NULL ,
+    username CHAR(255) NOT NULL,
     balance INT DEFAULT 0
 );
 

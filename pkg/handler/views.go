@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/lattots/piikittaja/pkg/user"
+	"github.com/lattots/piikittaja/pkg/models"
 )
 
 func (h *Handler) HandleIndex(w http.ResponseWriter, r *http.Request) {
@@ -29,21 +29,20 @@ func (h *Handler) HandleUserView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users := make([]user.User, 0)
+	var users []*models.User
+	var err error
 
 	userFilter := r.URL.Query().Get("username")
 
 	if userFilter == "" {
-		var err error
-		users, err = user.GetUsers(h.DB)
+		users, err = h.usrStore.GetUsers()
 		if err != nil {
 			log.Println("error fetching users from db", err)
 			http.Error(w, "error fetching users", http.StatusInternalServerError)
 			return
 		}
 	} else {
-		var err error
-		users, err = user.SearchUsers(h.DB, userFilter)
+		users, err = h.usrStore.SearchUsers(userFilter)
 		if err != nil {
 			log.Println("error fetching users from db", err)
 			http.Error(w, "error fetching users", http.StatusInternalServerError)

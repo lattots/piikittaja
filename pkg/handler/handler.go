@@ -1,19 +1,21 @@
 package handler
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"html/template"
 	"os"
 
 	"github.com/lattots/piikittaja/pkg/auth"
+	"github.com/lattots/piikittaja/pkg/transaction"
+	userstore "github.com/lattots/piikittaja/pkg/user_store"
 )
 
 type Handler struct {
-	DB   *sql.DB
-	tmpl *template.Template
-	Auth *auth.Service
+	traHandler transaction.TransactionHandler
+	usrStore   userstore.UserStore
+	tmpl       *template.Template
+	Auth       *auth.Service
 }
 
 const (
@@ -28,16 +30,16 @@ func NewHandler() (*Handler, error) {
 		return nil, errors.New("error getting database URL from environment variables")
 	}
 
-	// Database handle is created.
-	db, err := sql.Open("mysql", dbURL)
+	usrStore, err := userstore.NewMariaDBStore(dbURL)
 	if err != nil {
-		return nil, errors.New("error connecting to the database")
+		return nil, fmt.Errorf("error creating user store: %w", err)
 	}
 
-	err = db.Ping()
+	traStore, err := transaction.NewMariaDBStore(dbURL)
 	if err != nil {
-		return nil, fmt.Errorf("error pinging database: %w", err)
+		return nil, fmt.Errorf("error creating transaction store: %w", err)
 	}
+	traHandler := transaction.NewTransactionHandler(traStore)
 
 	cookieStoreKey := os.Getenv("COOKIE_STORE_SECRET")
 
@@ -49,7 +51,10 @@ func NewHandler() (*Handler, error) {
 
 	store := auth.NewCookieStore(sessionOptions)
 
-	authService := auth.NewService(store, db)
+	authService, err := auth.NewService(store, dbURL)
+	if err != nil {
+		return nil, fmt.Errorf("error creating auth service: %w", err)
+	}
 
 	// HTML template file is parsed
 	tmpl, err := template.ParseFiles("./assets/web_app/html/template.html")
@@ -57,5 +62,12 @@ func NewHandler() (*Handler, error) {
 		return nil, fmt.Errorf("error parsing template: %s", err)
 	}
 
-	return &Handler{DB: db, tmpl: tmpl, Auth: authService}, nil
+	h := &Handler{
+		traHandler: traHandler,
+		usrStore:   usrStore,
+		tmpl:       tmpl,
+		Auth:       authService,
+	}
+
+	return h, nil
 }

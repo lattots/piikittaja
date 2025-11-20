@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
@@ -18,7 +19,18 @@ type Service struct {
 	adminStore AdminStore // Database for storing admin information
 }
 
-func NewService(cookieStore *sessions.CookieStore, db *sql.DB) *Service {
+func NewService(cookieStore *sessions.CookieStore, dbURL string) (*Service, error) {
+	// Database handle is created for auth service
+	db, err := sql.Open("mysql", dbURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, fmt.Errorf("error pinging database: %w", err)
+	}
+
 	gothic.Store = cookieStore
 
 	callbackURL := buildCallbackURL("google")
@@ -29,7 +41,7 @@ func NewService(cookieStore *sessions.CookieStore, db *sql.DB) *Service {
 
 	adminDB := NewAdminDB(db)
 
-	return &Service{adminStore: adminDB}
+	return &Service{adminStore: adminDB}, nil
 }
 
 // GetSessionUser returns the user in the current session. Returns an error if no user is found.

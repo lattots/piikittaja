@@ -2,3 +2,4 @@ cicd/.env
 .idea
 bin/
 piikkibotti_github*
+secrets/

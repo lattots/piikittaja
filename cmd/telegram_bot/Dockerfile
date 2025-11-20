@@ -9,23 +9,17 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source files
-COPY ./cmd/web_app ./cmd/web_app
+COPY ./cmd/telegram_bot ./cmd/telegram_bot
 COPY ./pkg ./pkg
 
 # Build runnable binary from source
-RUN go build -o /bin/web-app ./cmd/web_app/server.go
+RUN go build -o /bin/telegram-bot ./cmd/telegram_bot
 
-# Final image for web app using Debian
+# Final image for Telegram bot using Debian
 FROM debian:12
 
 RUN apt-get update && apt-get install -y ca-certificates
 
 # Copy the binary from the builder stage
-COPY --from=builder /bin/web-app /usr/local/bin/web-app
-COPY ./assets/web_app ./assets/web_app
-
-# Expose container port 3000 to outside traffic
-EXPOSE 3000
-
-# Run the built binary
-CMD ["web-app"]
+COPY --from=builder /bin/telegram-bot /usr/local/bin/telegram-bot
+COPY ./assets/telegram_bot ./assets/telegram_bot

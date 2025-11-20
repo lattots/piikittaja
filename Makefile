@@ -7,56 +7,18 @@ MESSENGER_SRC_DIR := cmd/messenger
 
 # Runs docker compose that spins up containers with "piikki-web" and "piikki-bot" images from Docker Hub
 # Images need to be pushed to the repository before running this
-compose-up:
-	@docker compose -f ./cicd/compose.yaml up -d
+up:
+	docker compose -f compose.yaml up --build
 
-compose-down: clean-bot clean-web
+upd:
+	docker compose -f compose.yaml up --build -d
 
-# ---
-# Web app commands
+down:
+	docker compose down
 
-.PHONY: run-web stop-web clean-web log-web deploy-web
-
-build-web: $(wildcard $(TELEGRAM_BOT_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
-	@docker build -t lattots/piikki-web -f ./cicd/web_app/Dockerfile .
-
-run-web: build-web
-	@docker run -d --network="host" --name web-app-container lattots/piikki-web
-
-stop-web:
-	@docker stop web-app-container
-
-clean-web: stop-web
-	@docker rm web-app-container
-
-log-web:
-	@docker logs web-app-container
-
-deploy-web: build-web
-	@docker push lattots/piikki-web:latest
-
-# ---
-# Telegram bot commands
-
-.PHONY: run-bot stop-bot clean-bot log-bot deploy-bot
-
-build-bot: $(wildcard $(TELEGRAM_BOT_SRC_DIR)/*.go) $(wildcard pkg/**/*.go)
-	@docker build -t lattots/piikki-bot -f ./cicd/telegram_bot/Dockerfile .
-
-run-bot: build-bot
-	@docker run -d --network="host" --name telegram-bot-container lattots/piikki-bot
-
-stop-bot:
-	@docker stop telegram-bot-container
-
-clean-bot: stop-bot
-	@docker rm telegram-bot-container
-
-log-bot:
-	@docker logs telegram-bot-container
-
-deploy-bot: build-bot
-	@docker push lattots/piikki-bot:latest
+test:
+	docker compose -f ./test.compose.yaml down --volumes --remove-orphans
+	docker compose -f ./test.compose.yaml up --build
 
 # ---
 # Admin manager commands

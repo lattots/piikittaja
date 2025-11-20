@@ -36,7 +36,7 @@ func main() {
 	router.HandleFunc("GET /logout/{provider}", h.HandleLogout)
 	router.HandleFunc("GET /auth/{provider}", h.HandleProviderLogin)
 
-	port := ":3000"
+	const port = ":3000"
 	fmt.Printf("Server started on port %s\n", port)
 
 	if err = http.ListenAndServe(port, router); err != nil {

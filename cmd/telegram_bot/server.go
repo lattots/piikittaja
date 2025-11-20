@@ -4,29 +4,35 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"regexp"
-	"strconv"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/lattots/gipher"
-
-	"github.com/lattots/piikittaja/pkg/user"
+	telegramutil "github.com/lattots/piikittaja/pkg/telegram"
 )
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
+	// Database URL is read from environment variables.
+	dbURL := os.Getenv("DATABASE_APP")
+	if dbURL == "" {
+		log.Fatalln("error getting database URL from environment variables")
+	}
+
+	h, err := newHandler(dbURL)
+	if err != nil {
+		log.Fatalln("error creating telegram bot handler:", err)
+	}
+
 	fmt.Println("Creating bot...")
-	b, err := bot.New(os.Getenv("TELEGRAM_BOT_TOKEN"), bot.WithDefaultHandler(defaultHandler))
+	b, err := bot.New(os.Getenv("TELEGRAM_TOKEN"), bot.WithDefaultHandler(h.defaultHandler))
 	if err != nil {
 		log.Fatalln("error creating bot:\n", err)
 	}
@@ -57,9 +63,9 @@ func main() {
 		log.Fatalln("error setting commands for bot:\n", err)
 	}
 
-	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, handleStart)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, h.handleStart)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/piikkaa", bot.MatchTypeExact, handleGetAmountInput)
-	b.RegisterHandler(bot.HandlerTypeMessageText, "/piikki", bot.MatchTypeExact, handleGetBalance)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/piikki", bot.MatchTypeExact, h.handleGetBalance)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/terve", bot.MatchTypeExact, handleGreet)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/maksaminen", bot.MatchTypeExact, handlePaymentInfo)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/apua", bot.MatchTypeExact, handleHelp)
@@ -68,132 +74,6 @@ func main() {
 	fmt.Println("Bot created successfully")
 
 	b.Start(ctx)
-}
-
-func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	sender := update.Message.From
-	receivedMessage := update.Message.Text
-
-	amount, err := getAmount(receivedMessage)
-	// if function errors, the message is not an amount, and it should be handled as unknown command
-	// if function doesn't error, amount exists, and it should be handled as new tab
-
-	if err != nil {
-		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "En ymmärtänyt tuota. Kirjoita /apua saadaksesi apua.",
-		})
-		if err != nil {
-			log.Fatalln("error sending message:\n", err)
-		}
-		return
-	}
-
-	usr, err := user.NewUser(int(sender.ID), sender.Username)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = usr.UpdateUsername()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	transactionId, err := usr.Withdraw(amount)
-	if errors.Is(err, &user.ErrNotEnoughBalance{}) {
-		err = usr.SendMessage(b, "Tili ammottaa tyhjyyttään :O\n\nMene töihin!")
-		if err != nil {
-			log.Println(err)
-		}
-		return
-	} else if err != nil {
-		log.Println(err)
-		return
-	}
-
-	err = createAnimation(amount, transactionId)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	userBalance, err := usr.GetBalance()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	params, err := getSendAnimationParams(update, transactionId, userBalance)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = b.SendAnimation(ctx, params)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = os.Remove(fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId))
-	if err != nil {
-		log.Fatalln(err)
-	}
-}
-
-func handleStart(ctx context.Context, b *bot.Bot, update *models.Update) {
-	senderUsername := update.Message.Chat.Username
-
-	msg := fmt.Sprintf(
-		"Hyvää päivää, %s. Olet avannut PiikkiBotin. Onnittelut erinomaisesta valinnasta!\n\n"+
-			"Olet sitten kokenut piikittäjä tai portista astuva noviisi, saat apua kirjoittamalla /apua\n\n"+
-			"PiikkiBotti toimii kuin henkilökohtainen pankkitili, jolle voit tallettaa rahaa seuraavasti /maksaminen\n\n",
-		senderUsername,
-	)
-
-	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   msg,
-	})
-
-	if err != nil {
-		log.Fatalln("error sending message:\n", err)
-	}
-}
-
-func handleGetAmountInput(ctx context.Context, b *bot.Bot, update *models.Update) {
-	err := requestKeyboardInput(ctx, b, update)
-	if err != nil {
-		log.Fatalln("error requesting keyboard input:\n", err)
-	}
-}
-
-func handleGetBalance(ctx context.Context, b *bot.Bot, update *models.Update) {
-	sender := update.Message.From
-	u, err := user.NewUser(int(sender.ID), sender.Username)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = u.UpdateUsername()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	var response string
-
-	tab, err := u.GetBalance()
-	if err != nil {
-		log.Println(err)
-		response = "En löytänyt piikkiäsi..."
-	} else {
-		response = fmt.Sprintf("Saldosi on nyt: %d€", tab)
-	}
-
-	_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   response,
-	})
-
-	if err != nil {
-		log.Fatalln("error sending message:\n", err)
-	}
 }
 
 func handleGreet(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -213,6 +93,25 @@ func handleGreet(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 }
 
+func handleGetAmountInput(ctx context.Context, b *bot.Bot, update *models.Update) {
+	err := requestKeyboardInput(ctx, b, update)
+	if err != nil {
+		log.Fatalln("error requesting keyboard input:\n", err)
+	}
+}
+
+func handlePaymentInfo(ctx context.Context, b *bot.Bot, update *models.Update) {
+	params, err := getSendPhotoParams(update)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = b.SendPhoto(ctx, params)
+	if err != nil {
+		log.Fatalln("error sending message:", err)
+	}
+}
+
 func handleHelp(ctx context.Context, b *bot.Bot, update *models.Update) {
 	msg := "Olen PiikkiBotti. Autan killan tärkeimpiä vapaaehtoisia kirjanpitotehtävissä.\n\n" +
 		"/piikki: Nähdäksesi nykyisen saldosi.\n" +
@@ -229,56 +128,6 @@ func handleHelp(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if err != nil {
 		log.Fatalln("error sending message:\n", err)
 	}
-}
-
-func handlePaymentInfo(ctx context.Context, b *bot.Bot, update *models.Update) {
-	params, err := getSendPhotoParams(update)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = b.SendPhoto(ctx, params)
-	if err != nil {
-		log.Fatalln("error sending message:", err)
-	}
-}
-
-func getAmount(s string) (int, error) {
-	re := regexp.MustCompile(`^\d+`)
-	match := re.FindString(s)
-
-	if match == "" {
-		return 0, errors.New("input doesn't contain amount")
-	}
-
-	// try to convert string to int
-	// if string can't be converted, function errors
-	amount, err := strconv.Atoi(match)
-	if err != nil {
-		return 0, err
-	}
-
-	// Inputted amount is validated.
-	if !isValidAmount(amount) {
-		// If amount is not valid, function errors.
-		return 0, fmt.Errorf("amount is not valid: %d", amount)
-	}
-
-	return amount, nil
-}
-
-func isValidAmount(amount int) bool {
-	validAmounts := []int{
-		1, 2, 5, 10,
-	}
-	isValid := false
-	for _, validAmount := range validAmounts {
-		if amount == validAmount {
-			isValid = true
-			break
-		}
-	}
-	return isValid
 }
 
 func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update) error {
@@ -389,4 +238,12 @@ func getSendPhotoParams(update *models.Update) (*bot.SendPhotoParams, error) {
 	}
 
 	return params, nil
+}
+
+func handleInternalError(ctx context.Context, b *bot.Bot, sender *models.User) {
+	msg := "Nyt kävi kämmi. Kokeile kohta uudestaan!"
+	err := telegramutil.SendMessage(ctx, b, int64(sender.ID), msg)
+	if err != nil {
+		log.Printf("error sending error message to user %s: %s", sender.Username, err)
+	}
 }

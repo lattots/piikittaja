@@ -1,0 +1,73 @@
+services:
+  db:
+    image: mariadb:lts
+    container_name: piikki_test_db
+    restart: 'no'
+
+    secrets:
+      - db_root_password
+
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_DATABASE: piikki_test_db
+
+    volumes:
+      - db_data:/var/lib/mysql
+
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  migration:
+    build:
+      context: .
+      dockerfile: ./db/migration.Dockerfile
+    container_name: piikki_test_db_migration
+    restart: 'no'
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    secrets:
+      - db_root_password 
+
+    entrypoint: >
+      sh -c "
+        ROOT_PASSWORD=$$(cat /run/secrets/db_root_password);
+
+        mysql -h db -u root -p\"$$ROOT_PASSWORD\" piikki_test_db < /db/create_schema.sql;
+        mysql -h db -u root -p\"$$ROOT_PASSWORD\" piikki_test_db < /db/create_testing_users.sql;
+        mysql -h db -u root -p\"$$ROOT_PASSWORD\" piikki_test_db < /db/create_test_data.sql;
+        mysql -h db -u root -p\"$$ROOT_PASSWORD\" piikki_test_db < /db/create_search_index.sql;
+      "
+
+    volumes:
+      - ./db:/db
+
+  test_piikittaja:
+    build:
+      context: .
+      dockerfile: ./tests/tests.Dockerfile
+    container_name: piikki_test
+    restart: 'no'
+
+    depends_on:
+      migration:
+        condition: service_completed_successfully 
+
+    environment:
+      DATABASE_APP: "app_tester:app_test_pwd@tcp(db:3306)/piikki_test_db"
+
+    command: go test -v ./...
+
+volumes:
+  db_data:
+    driver: local
+
+secrets:
+  db_root_password:
+    file: ./secrets/test_mariadb_root_password.txt

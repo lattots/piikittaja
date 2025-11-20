@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/lattots/piikittaja/pkg/user"
 )
 
 func (h *Handler) HandleUserAction(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +31,7 @@ func (h *Handler) HandleUserAction(w http.ResponseWriter, r *http.Request) {
 		actionStatus = "Onnistui!"
 	}
 
-	usr, err := user.GetUserByUsername(h.DB, username)
+	usr, err := h.usrStore.GetByUsername(username)
 	if err != nil {
 		log.Println("error fetching user from database", err)
 		http.Error(w, "error fetching user", http.StatusInternalServerError)
@@ -41,9 +39,9 @@ func (h *Handler) HandleUserAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if action == "withdraw" {
-		_, err = usr.Withdraw(amount)
+		_, err = h.traHandler.Withdraw(usr, amount)
 	} else if action == "deposit" {
-		_, err = usr.Deposit(amount)
+		_, err = h.traHandler.Deposit(usr, amount)
 	} else {
 		log.Println("unknown action", err)
 		http.Error(w, "unknown action", http.StatusBadRequest)
@@ -56,7 +54,7 @@ func (h *Handler) HandleUserAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a map to hold the status message
-	data := map[string]interface{}{
+	data := map[string]any{
 		"ActionStatus": actionStatus,
 	}
 

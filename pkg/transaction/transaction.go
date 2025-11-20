@@ -1,20 +1,61 @@
 package transaction
 
-import "database/sql"
+import (
+	"errors"
+	"fmt"
 
-// New executes a new transaction. Returns the transaction ID and an error.
-func New(db *sql.DB, userId int, amount int) (int, error) {
-	// User's username is inserted to database.
-	// Tab gets a default value of 0 for all new user's.
-	result, err := db.Exec("INSERT INTO transactions (userId, amount) VALUES (?, ?)", userId, amount)
-	if err != nil {
-		return 0, err
+	"github.com/lattots/piikittaja/pkg/models"
+)
+
+type TransactionHandler interface {
+	Withdraw(user *models.User, amount int) (int, error)
+	Deposit(user *models.User, amount int) (int, error)
+}
+
+var ErrNotEnoughBalance = errors.New("user doesn't have enough balance to withdraw the amount")
+var ErrInvalidAmount = errors.New("entered amount is invalid. amount must be greater than 0")
+
+// canWithdraw is a helper function to check if user can withdraw specified amount
+func canWithdraw(user *models.User, amount int) bool {
+	const debtThreshold = 10
+	return user.Balance+debtThreshold >= amount || user.Username == "maanmittauskilta"
+}
+
+type transactionHandler struct {
+	store TransactionStore
+}
+
+func NewTransactionHandler(store TransactionStore) TransactionHandler {
+	return &transactionHandler{store: store}
+}
+
+func (h *transactionHandler) Withdraw(user *models.User, amount int) (int, error) {
+	if amount <= 0 {
+		return 0, ErrInvalidAmount
+	}
+	if !canWithdraw(user, amount) {
+		return 0, ErrNotEnoughBalance
 	}
 
-	transactionId, err := result.LastInsertId()
+	id, err := h.store.execute(user.ID, -amount)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("error executing transaction: %w", err)
+	}
+	user.Balance -= amount
+
+	return id, nil
+}
+
+func (h *transactionHandler) Deposit(user *models.User, amount int) (int, error) {
+	if amount <= 0 {
+		return 0, ErrInvalidAmount
 	}
 
-	return int(transactionId), nil
+	id, err := h.store.execute(user.ID, amount)
+	if err != nil {
+		return 0, fmt.Errorf("error executing transaction: %w", err)
+	}
+	user.Balance += amount
+
+	return id, nil
 }

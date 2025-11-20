@@ -1,7 +1,7 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -9,8 +9,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-telegram/bot"
-
-	"github.com/lattots/piikittaja/pkg/user"
+	telegramutil "github.com/lattots/piikittaja/pkg/telegram"
+	userstore "github.com/lattots/piikittaja/pkg/user_store"
 )
 
 func main() {
@@ -20,10 +20,9 @@ func main() {
 		log.Fatalln("error getting database URL from environment variables")
 	}
 
-	// Database handle is created.
-	db, err := sql.Open("mysql", dbURL)
+	usrStore, err := userstore.NewMariaDBStore(dbURL)
 	if err != nil {
-		log.Fatalln("error opening database connection:", err)
+		log.Fatalln("error creating user store", err)
 	}
 
 	fmt.Println("Creating bot...")
@@ -32,7 +31,7 @@ func main() {
 		log.Fatalln("error creating bot:\n", err)
 	}
 
-	users, err := user.GetUsers(db)
+	users, err := usrStore.GetUsers()
 	if err != nil {
 		log.Fatalln("error fetching users:", err)
 	}
@@ -49,7 +48,7 @@ func main() {
 				u.Username,
 				u.Balance,
 			)
-			err := u.SendMessage(b, msg)
+			err = telegramutil.SendMessage(context.TODO(), b, int64(u.ID), msg)
 			if errors.Is(bot.ErrorForbidden, err) {
 				log.Printf("User: %s has probably blocked PiikkiBotti...\nError: %s\n", u.Username, err.Error())
 			} else if err != nil {
