@@ -1,5 +1,5 @@
 cicd/.env
 .idea
 bin/
-piikkibotti_github*
+github_deploy_key*
 secrets/
