@@ -57,7 +57,7 @@ func (s *mariaDBStore) GetByUsername(username string) (*models.User, error) {
 }
 
 func (s *mariaDBStore) GetUsers() ([]*models.User, error) {
-	rows, err := s.db.Query("SELECT id, username, balance, isAdmin FROM users")
+	rows, err := s.db.Query("SELECT id, username, balance, isAdmin FROM users ORDER BY balance")
 	if err != nil {
 		return nil, err
 	}
