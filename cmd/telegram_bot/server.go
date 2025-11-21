@@ -70,6 +70,8 @@ func main() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/maksaminen", bot.MatchTypeExact, handlePaymentInfo)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/apua", bot.MatchTypeExact, handleHelp)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/help", bot.MatchTypeExact, handleHelp)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/lisaatg", bot.MatchTypePrefix, h.handleNewTelegramAdmin)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/lisaanetti", bot.MatchTypePrefix, h.handleNewWebAdmin)
 
 	fmt.Println("Bot created successfully")
 

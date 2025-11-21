@@ -39,7 +39,10 @@ func NewService(cookieStore *sessions.CookieStore, dbURL string) (*Service, erro
 		google.New(os.Getenv("GOOGLE_KEY"), os.Getenv("GOOGLE_SECRET"), callbackURL),
 	)
 
-	adminDB := NewAdminDB(db)
+	adminDB, err := NewAdminDB(dbURL)
+	if err != nil {
+		return nil, fmt.Errorf("error creating admin store: %w", err)
+	}
 
 	return &Service{adminStore: adminDB}, nil
 }
@@ -104,7 +107,13 @@ func RequireAuthentication(handlerFunc http.HandlerFunc, auth *Service) http.Han
 			return
 		}
 
-		if !auth.adminStore.IsAdmin(usr.Email) {
+		isAdmin, err := auth.adminStore.IsAdmin(usr.Email)
+		if err != nil {
+			log.Printf("error checking if user is admin: %s\n", err)
+			http.Redirect(w, r, "/login", http.StatusInternalServerError)
+			return
+		}
+		if !isAdmin {
 			log.Println("User is not authorized to access this resource")
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return

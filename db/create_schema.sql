@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT NOT NULL PRIMARY KEY,
-    username CHAR(255) NOT NULL,
-    balance INT DEFAULT 0
+    username VARCHAR(255) NOT NULL,
+    balance INT DEFAULT 0,
+    isAdmin BOOL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS transactions (

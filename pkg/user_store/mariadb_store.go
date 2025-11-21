@@ -34,10 +34,10 @@ func (s *mariaDBStore) Close() error {
 }
 
 func (s *mariaDBStore) GetByID(id int) (*models.User, error) {
-	row := s.db.QueryRow("SELECT username, balance FROM users WHERE id=?", id)
+	row := s.db.QueryRow("SELECT username, balance, isAdmin FROM users WHERE id=?", id)
 
 	user := &models.User{ID: id}
-	if err := row.Scan(&user.Username, &user.Balance); err != nil {
+	if err := row.Scan(&user.Username, &user.Balance, &user.IsAdmin); err != nil {
 		return nil, err
 	}
 
@@ -45,11 +45,11 @@ func (s *mariaDBStore) GetByID(id int) (*models.User, error) {
 }
 
 func (s *mariaDBStore) GetByUsername(username string) (*models.User, error) {
-	row := s.db.QueryRow("SELECT id, balance FROM users WHERE username=?", username)
+	row := s.db.QueryRow("SELECT id, balance, isAdmin FROM users WHERE username=?", username)
 
 	user := &models.User{Username: username}
 	user.Username = username
-	if err := row.Scan(&user.ID, &user.Balance); err != nil {
+	if err := row.Scan(&user.ID, &user.Balance, &user.IsAdmin); err != nil {
 		return nil, err
 	}
 
@@ -57,7 +57,7 @@ func (s *mariaDBStore) GetByUsername(username string) (*models.User, error) {
 }
 
 func (s *mariaDBStore) GetUsers() ([]*models.User, error) {
-	rows, err := s.db.Query("SELECT id, username, balance FROM users")
+	rows, err := s.db.Query("SELECT id, username, balance, isAdmin FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (s *mariaDBStore) GetUsers() ([]*models.User, error) {
 
 	for rows.Next() {
 		user := new(models.User)
-		err := rows.Scan(&user.ID, &user.Username, &user.Balance)
+		err := rows.Scan(&user.ID, &user.Username, &user.Balance, &user.IsAdmin)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (s *mariaDBStore) GetUsers() ([]*models.User, error) {
 func (s *mariaDBStore) SearchUsers(searchTerm string) ([]*models.User, error) {
 	searchTermFormatted := fmt.Sprintf("%%%s%%", searchTerm)
 	query := `
-		SELECT id, username, balance
+		SELECT id, username, balance, isAdmin
 		FROM users
 		WHERE username LIKE ?
     `
@@ -94,7 +94,7 @@ func (s *mariaDBStore) SearchUsers(searchTerm string) ([]*models.User, error) {
 
 	for rows.Next() {
 		user := new(models.User)
-		err := rows.Scan(&user.ID, &user.Username, &user.Balance)
+		err := rows.Scan(&user.ID, &user.Username, &user.Balance, &user.IsAdmin)
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func (s *mariaDBStore) SearchUsers(searchTerm string) ([]*models.User, error) {
 }
 
 func (s *mariaDBStore) Insert(u *models.User) error {
-	result, err := s.db.Exec("INSERT INTO users (id, username, balance) VALUES (?, ?, ?)", u.ID, u.Username, u.Balance)
+	result, err := s.db.Exec("INSERT INTO users (id, username, balance, isAdmin) VALUES (?, ?, ?, ?)", u.ID, u.Username, u.Balance, u.IsAdmin)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			return ErrUserAlreadyExists
@@ -125,7 +125,7 @@ func (s *mariaDBStore) Insert(u *models.User) error {
 }
 
 func (s *mariaDBStore) Update(u *models.User) error {
-	result, err := s.db.Exec("UPDATE users SET username=? WHERE id=?", u.Username, u.ID)
+	result, err := s.db.Exec("UPDATE users SET username=?, isAdmin=? WHERE id=?", u.Username, u.IsAdmin, u.ID)
 	if err != nil {
 		return fmt.Errorf("error executing user update: %w", err)
 	}

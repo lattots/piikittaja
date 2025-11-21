@@ -8,10 +8,12 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/go-telegram/bot"
 	tgmodels "github.com/go-telegram/bot/models"
 
+	"github.com/lattots/piikittaja/pkg/auth"
 	"github.com/lattots/piikittaja/pkg/models"
 	telegramutil "github.com/lattots/piikittaja/pkg/telegram"
 	"github.com/lattots/piikittaja/pkg/transaction"
@@ -21,6 +23,7 @@ import (
 type handler struct {
 	usrStore   userstore.UserStore
 	traHandler transaction.TransactionHandler
+	adminStore auth.AdminStore
 }
 
 func newHandler(dbURL string) (*handler, error) {
@@ -28,13 +31,19 @@ func newHandler(dbURL string) (*handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error creating user store: %w", err)
 	}
+
 	traStore, err := transaction.NewMariaDBStore(dbURL)
 	if err != nil {
 		return nil, fmt.Errorf("error creating transaction store: %w", err)
 	}
 	traHandler := transaction.NewTransactionHandler(traStore)
 
-	return &handler{usrStore: usrStore, traHandler: traHandler}, nil
+	adminStore, err := auth.NewAdminDB(dbURL)
+	if err != nil {
+		return nil, fmt.Errorf("error creating admin store: %s\n", err)
+	}
+
+	return &handler{usrStore: usrStore, traHandler: traHandler, adminStore: adminStore}, nil
 }
 
 func (h *handler) defaultHandler(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
@@ -172,6 +181,115 @@ func (h *handler) handleGetBalance(ctx context.Context, b *bot.Bot, update *tgmo
 	err = telegramutil.SendMessage(context.TODO(), b, int64(sender.ID), msg)
 	if err != nil {
 		log.Printf("error sending error message to user %s: %s", sender.Username, err)
+	}
+}
+
+func (h *handler) handleNewTelegramAdmin(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
+	fullText := update.Message.Text
+	parts := strings.Fields(fullText)
+
+	// Expected format: /lisaatg username
+	if len(parts) != 2 {
+		msg := "Käyttö: /lisaatg <käyttäjänimi>"
+		err := telegramutil.SendMessage(ctx, b, update.Message.From.ID, msg)
+		if err != nil {
+			handleInternalError(ctx, b, update.Message.From)
+			log.Printf("error sending invalid command message: %s\n", err)
+		}
+		return
+	}
+
+	username := parts[1]
+
+	from := update.Message.From
+	sender, err := h.usrStore.GetByID(int(from.ID))
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error getting sender from store: %s\n", err)
+		return
+	}
+
+	if !sender.IsAdmin {
+		msg := "Valitettavasti sinulla ei ole oikeutta luoda uusia pääkäyttäjiä. Womp womp:)"
+		err = telegramutil.SendMessage(ctx, b, from.ID, msg)
+		if err != nil {
+			handleInternalError(ctx, b, from)
+			log.Printf("error sending unauthorised message: %s\n", err)
+		}
+		return
+	}
+
+	newAdmin, err := h.usrStore.GetByUsername(username)
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error getting new admin user from store: %s\n", err)
+		return
+	}
+
+	newAdmin.IsAdmin = true
+
+	err = h.usrStore.Update(newAdmin)
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error updating new admin user in store: %s\n", err)
+		return
+	}
+
+	msg := fmt.Sprintf("Lisätty! Käyttäjä \"%s\" on nyt Telegram-botin ylläpitäjä.", newAdmin.Username)
+	err = telegramutil.SendMessage(ctx, b, from.ID, msg)
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error sending success message to new admin issuer: %s\n", err)
+	}
+}
+
+func (h *handler) handleNewWebAdmin(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
+	fullText := update.Message.Text
+	parts := strings.Fields(fullText)
+
+	// Expected format: /lisaanetti john@doe.com
+	if len(parts) != 2 {
+		msg := "Käyttö: /lisaanetti <sähköposti>"
+		err := telegramutil.SendMessage(ctx, b, update.Message.From.ID, msg)
+		if err != nil {
+			handleInternalError(ctx, b, update.Message.From)
+			log.Printf("error sending invalid command message: %s\n", err)
+		}
+		return
+	}
+
+	email := parts[1]
+
+	from := update.Message.From
+	sender, err := h.usrStore.GetByID(int(from.ID))
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error getting sender from store: %s\n", err)
+		return
+	}
+
+	if !sender.IsAdmin {
+		msg := "Valitettavasti sinulla ei ole oikeutta luoda uusia pääkäyttäjiä. Womp womp:)"
+		err = telegramutil.SendMessage(ctx, b, from.ID, msg)
+		if err != nil {
+			handleInternalError(ctx, b, from)
+			log.Printf("error sending unauthorised message: %s\n", err)
+		}
+		return
+	}
+
+	err = h.adminStore.AddAdmin(email)
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error adding new web admin: %s\n", err)
+		return
+	}
+
+	msg := fmt.Sprintf("Lisätty! Käyttäjä \"%s\" on nyt nettisivun ylläpitäjä.", email)
+	err = telegramutil.SendMessage(ctx, b, from.ID, msg)
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error sending success message to new admin issuer: %s\n", err)
 	}
 }
 

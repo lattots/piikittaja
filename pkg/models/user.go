@@ -4,6 +4,7 @@ type User struct {
 	ID       int
 	Username string
 	Balance  int
+	IsAdmin  bool
 }
 
 func NewUser(id int, username string) *User {
