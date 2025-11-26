@@ -32,7 +32,7 @@ func main() {
 	}
 
 	fmt.Println("Creating bot...")
-	b, err := bot.New(os.Getenv("TELEGRAM_TOKEN"), bot.WithDefaultHandler(h.defaultHandler))
+	b, err := bot.New(os.Getenv("TELEGRAM_TOKEN"), bot.WithDefaultHandler(h.defaultHandler), bot.WithWorkers(3))
 	if err != nil {
 		log.Fatalln("error creating bot:\n", err)
 	}
