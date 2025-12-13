@@ -293,6 +293,67 @@ func (h *handler) handleNewWebAdmin(ctx context.Context, b *bot.Bot, update *tgm
 	}
 }
 
+func (h *handler) handlePaymentReminder(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
+	from := update.Message.From
+	sender, err := h.usrStore.GetByID(int(from.ID))
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error getting sender from store: %s\n", err)
+		return
+	}
+
+	if !sender.IsAdmin {
+		msg := "Sinulla ei ole tuollaisia lupia. Kannattaa ensi vaaleissa harkita IEyttä, jotta pääset tähän klubiin:)"
+		err = telegramutil.SendMessage(ctx, b, int64(sender.ID), msg)
+		if err != nil {
+			handleInternalError(ctx, b, from)
+			log.Printf("error sending message to user \"%s\": %s", sender.Username, err)
+			return
+		}
+	}
+
+	users, err := h.usrStore.GetUsers()
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error getting users from store: %s", err)
+		return
+	}
+
+	msgCounter := 0
+	for _, usr := range users {
+		// Only users with negative balance are reminded
+		if usr.Balance >= 0 {
+			continue
+		}
+
+		msg := fmt.Sprintf(
+			"Hei, %s! On käynyt ilmi, että sitä on rilluteltu, jonka seurauksena saldo on päässyt pakkaselle. "+
+				"Maksathan velkasi ensitilassa IE:lle.\n\nNykyinen saldosi: %d\n\n"+
+				"Paatuneelta piikittäjältä maksaminen sujuu varmasti jo kuin tanssi, mutta muiden kohdalla suosittelen "+
+				"kääntymään ohjeistuksen puoleen komennolla /maksaminen. "+
+				"Saldoa on myös mahdollista kerryttää etukäteen, jos luulet, että lähitulevaisuudessa korkki taas aukeaa...",
+			usr.Username,
+			usr.Balance,
+		)
+
+		err = telegramutil.SendMessage(context.TODO(), b, int64(usr.ID), msg)
+		if errors.Is(bot.ErrorForbidden, err) {
+			log.Printf("User: %s has probably blocked PiikkiBotti...\nError: %s\n", usr.Username, err.Error())
+		} else if err != nil {
+			log.Printf("fatal error while sending message to %s: %s\n", usr.Username, err.Error())
+		}
+		msgCounter++
+	}
+
+	msg := fmt.Sprintf("Maksumuistutukset lähetetty %d käyttäjälle:) Fyrkkaa tulossa!", msgCounter)
+	err = telegramutil.SendMessage(ctx, b, int64(sender.ID), msg)
+	if err != nil {
+		handleInternalError(ctx, b, from)
+		log.Printf("error sending message to user \"%s\": %s", sender.Username, err)
+		return
+	}
+}
+
 func getAmount(s string) (int, error) {
 	re := regexp.MustCompile(`^\d+`)
 	match := re.FindString(s)
