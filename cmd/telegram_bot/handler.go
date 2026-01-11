@@ -85,7 +85,7 @@ func (h *handler) defaultHandler(ctx context.Context, b *bot.Bot, update *tgmode
 		return
 	}
 
-	transactionId, err := h.traHandler.Withdraw(u, amount)
+	_, err = h.traHandler.Withdraw(u, amount)
 	if errors.Is(err, transaction.ErrNotEnoughBalance) {
 		msg := "Tili ammottaa tyhjyyttään :O\n\nMene töihin!"
 		log.Println(err)
@@ -100,24 +100,12 @@ func (h *handler) defaultHandler(ctx context.Context, b *bot.Bot, update *tgmode
 		return
 	}
 
-	err = createAnimation(amount, transactionId)
+	successMsg := fmt.Sprintf("Onnistui! Nauti herkuistasi:)\nNykyinen piikkisi on %s", amountparser.String(u.Balance))
+	err = telegramutil.SendMessage(ctx, b, sender.ID, successMsg)
 	if err != nil {
-		log.Fatalln(err)
-	}
-
-	params, err := getSendAnimationParams(update, transactionId, u.Balance)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	_, err = b.SendAnimation(ctx, params)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = os.Remove(fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId))
-	if err != nil {
-		log.Fatalln(err)
+		log.Printf("error while sending message to %s: %s\n", sender.Username, err)
+		handleInternalError(ctx, b, sender)
+		return
 	}
 }
 

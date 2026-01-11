@@ -8,11 +8,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"path/filepath"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
-	"github.com/lattots/gipher"
 	telegramutil "github.com/lattots/piikittaja/pkg/telegram"
 )
 
@@ -172,52 +170,6 @@ func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update
 	}
 
 	return nil
-}
-
-func createAnimation(amount, transactionId int) error {
-	if !isValidAmount(amount) {
-		return fmt.Errorf("error creating animation for amount: %d", amount)
-	}
-
-	// Ensure that the tmp/ directory exists
-	// This directory is used to temporarily store created animation files
-	tmpPath := filepath.Join(".", "assets", "telegram_bot", "tmp")
-	err := os.MkdirAll(tmpPath, os.ModePerm)
-	if err != nil {
-		return fmt.Errorf("error creating tmp directory: %w", err)
-	}
-
-	backgroundFilename := fmt.Sprintf("./assets/telegram_bot/%d€.gif", amount)
-	outputFilename := fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId)
-	fontFilename := "./assets/telegram_bot/Raleway-Black.ttf"
-
-	err = gipher.CreateTimeStampGIF(backgroundFilename, outputFilename, fontFilename)
-	return err
-}
-
-func getSendAnimationParams(update *models.Update, transactionId, userBalance int) (*bot.SendAnimationParams, error) {
-	animationFile, err := os.Open(fmt.Sprintf("./assets/telegram_bot/tmp/%d.gif", transactionId))
-	if err != nil {
-		return nil, fmt.Errorf("error opening GIF file with ID %d: %s", transactionId, err)
-	}
-
-	reader := bufio.NewReader(animationFile)
-
-	animation := &models.InputFileUpload{
-		Filename: "rahaa",
-		Data:     reader,
-	}
-
-	params := &bot.SendAnimationParams{
-		ChatID:    update.Message.Chat.ID,
-		Width:     100,
-		Height:    100,
-		Duration:  1,
-		Animation: animation,
-		Caption:   fmt.Sprintf("Saldosi on nyt %d€", userBalance),
-	}
-
-	return params, nil
 }
 
 func getSendPhotoParams(update *models.Update) (*bot.SendPhotoParams, error) {
