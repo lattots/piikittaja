@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
-	"strconv"
+	"slices"
 	"strings"
 
 	"github.com/go-telegram/bot"
 	tgmodels "github.com/go-telegram/bot/models"
 
+	amountparser "github.com/lattots/piikittaja/pkg/amount_parser"
 	"github.com/lattots/piikittaja/pkg/auth"
 	"github.com/lattots/piikittaja/pkg/models"
 	telegramutil "github.com/lattots/piikittaja/pkg/telegram"
@@ -50,11 +50,11 @@ func (h *handler) defaultHandler(ctx context.Context, b *bot.Bot, update *tgmode
 	sender := update.Message.From
 	receivedMessage := update.Message.Text
 
-	amount, err := getAmount(receivedMessage)
+	amount, err := amountparser.ParseToCents(receivedMessage)
 	// if function errors, the message is not an amount, and it should be handled as unknown command
 	// if function doesn't error, amount exists, and it should be handled as new tab
 
-	if err != nil {
+	if err != nil || !isValidAmount(amount) {
 		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   "En ymmärtänyt tuota. Kirjoita /apua saadaksesi apua.",
@@ -177,7 +177,7 @@ func (h *handler) handleGetBalance(ctx context.Context, b *bot.Bot, update *tgmo
 		return
 	}
 
-	msg := fmt.Sprintf("Saldosi on nyt: %d€", u.Balance)
+	msg := fmt.Sprintf("Saldosi on nyt: %s", amountparser.String(u.Balance))
 	err = telegramutil.SendMessage(context.TODO(), b, int64(sender.ID), msg)
 	if err != nil {
 		log.Printf("error sending error message to user %s: %s", sender.Username, err)
@@ -328,12 +328,12 @@ func (h *handler) handlePaymentReminder(ctx context.Context, b *bot.Bot, update 
 
 		msg := fmt.Sprintf(
 			"Hei, %s! On käynyt ilmi, että sitä on rilluteltu, jonka seurauksena saldo on päässyt pakkaselle. "+
-				"Maksathan velkasi ensitilassa IE:lle.\n\nNykyinen saldosi: %d\n\n"+
+				"Maksathan velkasi ensitilassa IE:lle.\n\nNykyinen saldosi: %s\n\n"+
 				"Paatuneelta piikittäjältä maksaminen sujuu varmasti jo kuin tanssi, mutta muiden kohdalla suosittelen "+
 				"kääntymään ohjeistuksen puoleen komennolla /maksaminen. "+
 				"Saldoa on myös mahdollista kerryttää etukäteen, jos luulet, että lähitulevaisuudessa korkki taas aukeaa...",
 			usr.Username,
-			usr.Balance,
+			amountparser.String(usr.Balance),
 		)
 
 		err = telegramutil.SendMessage(context.TODO(), b, int64(usr.ID), msg)
@@ -354,40 +354,9 @@ func (h *handler) handlePaymentReminder(ctx context.Context, b *bot.Bot, update 
 	}
 }
 
-func getAmount(s string) (int, error) {
-	re := regexp.MustCompile(`^\d+`)
-	match := re.FindString(s)
-
-	if match == "" {
-		return 0, errors.New("input doesn't contain amount")
-	}
-
-	// try to convert string to int
-	// if string can't be converted, function errors
-	amount, err := strconv.Atoi(match)
-	if err != nil {
-		return 0, err
-	}
-
-	// Inputted amount is validated.
-	if !isValidAmount(amount) {
-		// If amount is not valid, function errors.
-		return 0, fmt.Errorf("amount is not valid: %d", amount)
-	}
-
-	return amount, nil
-}
-
 func isValidAmount(amount int) bool {
 	validAmounts := []int{
-		1, 2, 5, 10,
+		1_00, 1_50, 2_00, 3_00, 4_00, 10_00,
 	}
-	isValid := false
-	for _, validAmount := range validAmounts {
-		if amount == validAmount {
-			isValid = true
-			break
-		}
-	}
-	return isValid
+	return slices.Contains(validAmounts, amount)
 }
