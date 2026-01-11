@@ -141,10 +141,14 @@ func requestKeyboardInput(ctx context.Context, b *bot.Bot, update *models.Update
 	keyboard := [][]models.KeyboardButton{
 		{
 			{Text: "1€"},
-			{Text: "2€"},
+			{Text: "1,5€"},
 		},
 		{
-			{Text: "5€"},
+			{Text: "2€"},
+			{Text: "3€"},
+		},
+		{
+			{Text: "4€"},
 			{Text: "10€"},
 		},
 	}

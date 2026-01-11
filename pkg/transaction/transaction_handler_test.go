@@ -14,31 +14,31 @@ func TestValidTransactions(t *testing.T) {
 
 	user := models.NewUser(0, "test user")
 
-	_, err := handler.Deposit(user, 100)
+	_, err := handler.Deposit(user, 100_00)
 	if err != nil {
 		t.Fatalf("valid deposit failed: %s", err)
 	}
 
-	if user.Balance != 100 {
-		t.Fatalf("user balance invalid: want 100 got %d", user.Balance)
+	if user.Balance != 100_00 {
+		t.Fatalf("user balance invalid: want 10000 got %d", user.Balance)
 	}
 
-	_, err = handler.Withdraw(user, 10)
+	_, err = handler.Withdraw(user, 10_00)
 	if err != nil {
 		t.Fatalf("valid withdraw failed: %s", err)
 	}
 
-	if user.Balance != 90 {
-		t.Fatalf("user balance invalid: want 90 got %d", user.Balance)
+	if user.Balance != 90_00 {
+		t.Fatalf("user balance invalid: want 9000 got %d", user.Balance)
 	}
 
-	_, err = handler.Withdraw(user, 100)
+	_, err = handler.Withdraw(user, 100_00)
 	if err != nil {
 		t.Fatalf("valid withdraw failed: %s", err)
 	}
 
-	if user.Balance != -10 {
-		t.Fatalf("user balance invalid: want -10 got %d", user.Balance)
+	if user.Balance != -10_00 {
+		t.Fatalf("user balance invalid: want -10_00 got %d", user.Balance)
 	}
 }
 
@@ -66,9 +66,10 @@ func TestInvalidTransactions(t *testing.T) {
 		t.Fatalf("user balance invalid: want 0 got %d", user.Balance)
 	}
 
-	_, err = handler.Withdraw(user, 11)
+	// Try to withdraw over the debt limit
+	_, err = handler.Withdraw(user, 11_00) // 11 €
 	if !errors.Is(err, transaction.ErrNotEnoughBalance) {
-		t.Fatalf("wrong error for insufficient funds: want ErrNotEnoughBalance got %s", err)
+		t.Errorf("wrong error for insufficient funds: want ErrNotEnoughBalance got %s", err)
 	}
 
 	if user.Balance != 0 {

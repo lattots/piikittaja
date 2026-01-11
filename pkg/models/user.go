@@ -3,7 +3,7 @@ package models
 type User struct {
 	ID       int
 	Username string
-	Balance  int
+	Balance  int // Balance in cents
 	IsAdmin  bool
 }
 

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	amountparser "github.com/lattots/piikittaja/pkg/amount_parser"
 	"github.com/lattots/piikittaja/pkg/models"
 )
 
@@ -51,7 +52,16 @@ func (h *Handler) HandleUserView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, u := range users {
-		err := singleUser.Execute(w, u)
+		displayData := struct {
+			ID       int
+			Username string
+			Balance  string
+		}{
+			ID:       u.ID,
+			Username: u.Username,
+			Balance:  amountparser.String(u.Balance),
+		}
+		err := singleUser.Execute(w, displayData)
 		if err != nil {
 			log.Println("error executing single user template")
 			http.Error(w, "could not execute single user template", http.StatusInternalServerError)

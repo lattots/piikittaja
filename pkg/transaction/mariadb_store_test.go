@@ -37,22 +37,22 @@ func TestMariaDBStore(t *testing.T) {
 		t.Fatalf("error inserting user to store: %s", err)
 	}
 
-	_, err = handler.Deposit(user, 100)
+	_, err = handler.Deposit(user, 100_00)
 	if err != nil {
 		t.Fatalf("error making deposit transaction: %s", err)
 	}
 
-	if user.Balance != 100 {
-		t.Fatalf("bad user balance in memory: want 100 got %d", user.Balance)
+	if user.Balance != 100_00 {
+		t.Fatalf("bad user balance in memory: want 10000 got %d", user.Balance)
 	}
 
-	_, err = handler.Withdraw(user, 50)
+	_, err = handler.Withdraw(user, 50_00)
 	if err != nil {
 		t.Fatalf("error making withdraw transaction: %s", err)
 	}
 
-	if user.Balance != 50 {
-		t.Fatalf("bad user balance in memory: want 50 got %d", user.Balance)
+	if user.Balance != 50_00 {
+		t.Fatalf("bad user balance in memory: want 50_00 got %d", user.Balance)
 	}
 
 	user, err = usrStore.GetByID(testUserID)
@@ -60,17 +60,18 @@ func TestMariaDBStore(t *testing.T) {
 		t.Fatalf("error getting test user from store: %s", err)
 	}
 
-	if user.Balance != 50 {
-		t.Fatalf("bad user balance in store: want 50 got %d", user.Balance)
+	if user.Balance != 50_00 {
+		t.Fatalf("bad user balance in store: want 50_00 got %d", user.Balance)
 	}
 
-	_, err = handler.Withdraw(user, 61)
+	// Try to withdraw over the debt limit
+	_, err = handler.Withdraw(user, 61_00) // 61 €
 	if !errors.Is(err, transaction.ErrNotEnoughBalance) {
 		t.Fatalf("wrong error for withdraw attempt: want ErrNotEnoughBalance got %s", err)
 	}
 
-	if user.Balance != 50 {
-		t.Fatalf("bad user balance in store: want 50 got %d", user.Balance)
+	if user.Balance != 50_00 {
+		t.Fatalf("bad user balance in store: want 50_00 got %d", user.Balance)
 	}
 
 	err = usrStore.Remove(testUserID)

@@ -3,7 +3,8 @@ package handler
 import (
 	"log"
 	"net/http"
-	"strconv"
+
+	amountparser "github.com/lattots/piikittaja/pkg/amount_parser"
 )
 
 func (h *Handler) HandleUserAction(w http.ResponseWriter, r *http.Request) {
@@ -22,9 +23,10 @@ func (h *Handler) HandleUserAction(w http.ResponseWriter, r *http.Request) {
 
 	username := r.Form.Get("username")
 	action := r.Form.Get("action-type")
-	amount, err := strconv.Atoi(r.Form.Get("amount"))
+	amount, err := amountparser.ParseToCents(r.Form.Get("amount"))
 
-	if err != nil {
+	// amounts should be positive as the action takes care of withdraw vs deposit
+	if err != nil || amount < 0 {
 		log.Println("error converting amount to integer")
 		actionStatus = "Jokin meni pieleen..."
 	} else {
