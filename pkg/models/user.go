@@ -17,9 +17,10 @@ type UserResponse struct {
 	Balance  int    `json:"balance"`
 }
 
-type TransactionRequest struct {
-	UserID int    `json:"userId"`
-	Issuer string `json:"issuer"`
-	Type   string `json:"type"`   // Transaction type: withdraw / deposit
-	Amount int    `json:"amount"` // Transaction amount in cents
+func (u *User) ToResponse() UserResponse {
+	return UserResponse{
+		ID:       u.ID,
+		Username: u.Username,
+		Balance:  u.Balance,
+	}
 }

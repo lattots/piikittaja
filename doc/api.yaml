@@ -1,0 +1,82 @@
+openapi: 3.1.1
+info:
+  title: Piikki Web API
+  version: 0.0.1
+paths:
+  /users:
+    get:
+      summary: Fetch users
+      parameters:
+        - name: searchTerm
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /users/{userId}:
+    get:
+      summary: Fetch a single user by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+  /users/{userId}/transactions:
+    post:
+      summary: Create a transaction
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer     
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transaction'
+      responses:
+        '201':
+          description: Transaction successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: Insufficient funds
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        balance: { type: integer, description: "Balance in cents" }
+    Transaction:
+      type: object
+      required: [type, amount]
+      properties:
+        issuer: { type: string }
+        type: { type: string, enum: [withdraw, deposit] }
+        amount: { type: integer, description: "Amount in cents" }

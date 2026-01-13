@@ -22,4 +22,3 @@ RUN apt-get update && apt-get install -y ca-certificates
 
 # Copy the binary from the builder stage
 COPY --from=builder /bin/web-app /usr/local/bin/web-app
-COPY ./assets/web_app ./assets/web_app
