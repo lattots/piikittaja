@@ -1,0 +1,59 @@
+h1 {
+  font-size: 1000%;
+  text-align: center;
+}
+
+.flex-box {
+  display: flex;
+  justify-content: center;
+}
+
+/* Styling for the button */
+.gsi-material-button {
+  background-color: white;
+  border: 1px solid #dadce0;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem;
+  cursor: pointer;
+  font-family: sans-serif;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.gsi-material-button:hover {
+  background-color: #f5f5f5;
+}
+
+.gsi-material-button:active {
+  background-color: #e0e0e0;
+}
+
+.gsi-material-button-state {
+  display: none;
+}
+
+.gsi-material-button-content-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.gsi-material-button-icon {
+  margin-right: 0.5rem;
+}
+
+.gsi-material-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.gsi-material-button-contents {
+  font-weight: 600;
+  color: #5f6368;
+}
+
+/* Hide the duplicate text */
+.gsi-material-button-content-wrapper span[style="display: none;"] {
+  display: none;
+}
