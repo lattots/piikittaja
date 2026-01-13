@@ -62,7 +62,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '403':
+        '402':
           description: Insufficient funds
 
 components:
