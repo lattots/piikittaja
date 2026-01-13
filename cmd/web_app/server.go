@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -14,22 +15,20 @@ import (
 func main() {
 	router := http.NewServeMux()
 
-	// Serve static files from the 'assets/web_app' directory
-	staticFileHandler := http.StripPrefix("/assets/web_app/", http.FileServer(http.Dir("./assets/web_app")))
-	router.Handle("/assets/web_app/", staticFileHandler)
+	host := os.Getenv("HOST_URL")
+	if host == "" {
+		log.Fatalln("HOST_URL not provided in environment variables")
+	}
 
-	h, err := handler.NewHandler()
+	h, err := handler.NewHandler(host)
 	if err != nil {
 		log.Fatalln("error creating new handler:", err)
 	}
 
-	// Views
-	router.HandleFunc("/", auth.RequireAuthentication(h.HandleIndex, h.Auth))
-	router.HandleFunc("GET /user-view", auth.RequireAuthentication(h.HandleUserView, h.Auth))
-	router.HandleFunc("GET /login", h.HandleLogin)
-
-	// Actions
-	router.HandleFunc("POST /action", auth.RequireAuthentication(h.HandleUserAction, h.Auth))
+	// API routes
+	router.HandleFunc("GET /users/{userId}", auth.RequireAuthentication(h.GetUserByID, h.Auth))
+	router.HandleFunc("GET /users", auth.RequireAuthentication(h.GetUsers, h.Auth))
+	router.HandleFunc("POST /transactions", auth.RequireAuthentication(h.NewTransaction, h.Auth))
 
 	// Auth
 	router.HandleFunc("GET /auth/{provider}/callback", h.HandleAuthCallback)

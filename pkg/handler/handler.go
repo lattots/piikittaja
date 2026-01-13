@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"os"
 
 	"github.com/lattots/piikittaja/pkg/auth"
@@ -12,9 +11,9 @@ import (
 )
 
 type Handler struct {
+	hostUrl    string
 	traHandler transaction.TransactionHandler
 	usrStore   userstore.UserStore
-	tmpl       *template.Template
 	Auth       *auth.Service
 }
 
@@ -23,7 +22,7 @@ const (
 	cookieStoreIsProd = true
 )
 
-func NewHandler() (*Handler, error) {
+func NewHandler(hostUrl string) (*Handler, error) {
 	// Database URL is read from environment variables.
 	dbURL := os.Getenv("DATABASE_APP")
 	if dbURL == "" {
@@ -56,16 +55,10 @@ func NewHandler() (*Handler, error) {
 		return nil, fmt.Errorf("error creating auth service: %w", err)
 	}
 
-	// HTML template file is parsed
-	tmpl, err := template.ParseFiles("./assets/web_app/html/template.html")
-	if err != nil {
-		return nil, fmt.Errorf("error parsing template: %s", err)
-	}
-
 	h := &Handler{
+		hostUrl:    hostUrl,
 		traHandler: traHandler,
 		usrStore:   usrStore,
-		tmpl:       tmpl,
 		Auth:       authService,
 	}
 

@@ -16,7 +16,7 @@ func (h *Handler) HandleProviderLogin(w http.ResponseWriter, r *http.Request) {
 
 	if u, err := gothic.CompleteUserAuth(w, r); err == nil {
 		log.Println("User already logged in:", u)
-		h.HandleIndex(w, r)
+		http.Redirect(w, r, h.hostUrl+"/app", http.StatusTemporaryRedirect)
 	} else {
 		gothic.BeginAuthHandler(w, r)
 	}
@@ -45,7 +45,7 @@ func (h *Handler) HandleAuthCallback(w http.ResponseWriter, r *http.Request) {
 
 	filterCookies(w)
 
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, h.hostUrl+"/app", http.StatusTemporaryRedirect)
 }
 
 func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +58,7 @@ func (h *Handler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(fmt.Errorf("failed to remove session: %w", err))
 	}
 
-	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, h.hostUrl+"/app/login", http.StatusTemporaryRedirect)
 }
 
 // Function to filter out _gothic cookies from the response
