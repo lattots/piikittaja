@@ -83,6 +83,7 @@ func (h *Handler) NewTransaction(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to decode request body", http.StatusInternalServerError)
 		return
 	}
+	defer r.Body.Close()
 
 	switch req.Type {
 	case "deposit":

@@ -64,3 +64,10 @@ func NewHandler(hostUrl string) (*Handler, error) {
 
 	return h, nil
 }
+
+func NewTestHandler(usrStore userstore.UserStore, traHandler transaction.TransactionHandler) *Handler {
+	return &Handler{
+		usrStore:   usrStore,
+		traHandler: traHandler,
+	}
+}
