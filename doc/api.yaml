@@ -72,6 +72,8 @@ components:
       properties:
         id: { type: integer }
         username: { type: string }
+        firstName: { type: string }
+        lastName: { type: string }
         balance: { type: integer, description: "Balance in cents" }
     Transaction:
       type: object
