@@ -8,6 +8,7 @@ export type User = {
 
 export type Transaction = {
 	issuer: string
+	issuedAt: Date
 	type: string
 	amount: number // Transaction amount in cents
 }

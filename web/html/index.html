@@ -4,10 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PiikkiBotti</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link href="/app/style.css" rel="stylesheet" />
   </head>
   <body>
     <h1>PIIKKI</h1>
-    <user-table api-url="/api"></user-table>
+    <div class="flexbox">
+      <div class="container">
+        <user-table api-url="/api"></user-table>
+      </div>
+      <div class="container">
+        <app-stats></app-stats>
+      </div>
+    </div>
     <script type="module" src="index.js"></script>
   </body>
 </html>
