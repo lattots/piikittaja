@@ -76,7 +76,7 @@ func (h *Handler) NewTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req models.TransactionRequest
+	var req models.Transaction
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		log.Printf("error decoding transaction request: %s\n", err)
@@ -108,6 +108,46 @@ func (h *Handler) NewTransaction(w http.ResponseWriter, r *http.Request) {
 	usrResp := usr.ToResponse()
 
 	writeJSONResponse(w, http.StatusCreated, usrResp)
+}
+
+const defaultTransactionQuantity = 3
+
+func (h *Handler) GetTransactions(w http.ResponseWriter, r *http.Request) {
+	userID := r.PathValue("userId")
+	if userID == "" {
+		http.Error(w, "No userId provided in request", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		http.Error(w, "userId is not an integer", http.StatusBadRequest)
+		return
+	}
+
+	usr, err := h.usrStore.GetByID(id)
+	if errors.Is(err, userstore.ErrUserNotExists) {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	quantityStr := r.URL.Query().Get("quantity")
+	quantity := defaultTransactionQuantity
+	if quantityStr != "" {
+		quantityInt, err := strconv.Atoi(quantityStr)
+		if err == nil {
+			quantity = quantityInt
+		}
+	}
+
+	transactions, err := h.traHandler.GetTransactions(usr, quantity)
+	if err != nil {
+		log.Printf("error getting transactions for user %d: %s\n", usr.ID, err)
+		http.Error(w, "Failed to get transactions", http.StatusInternalServerError)
+		return
+	}
+
+	writeJSONResponse(w, http.StatusOK, transactions)
 }
 
 // writeJSONResponse writes JSON encodable data to response writer with the provided status code

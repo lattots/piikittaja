@@ -1,10 +1,12 @@
 package models
 
 type User struct {
-	ID       int
-	Username string
-	Balance  int // Balance in cents
-	IsAdmin  bool
+	ID        int
+	Username  string
+	FirstName string
+	LastName  string
+	Balance   int // Balance in cents
+	IsAdmin   bool
 }
 
 func NewUser(id int, username string) *User {
@@ -12,15 +14,19 @@ func NewUser(id int, username string) *User {
 }
 
 type UserResponse struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Balance  int    `json:"balance"`
+	ID        int    `json:"id"`
+	Username  string `json:"username"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Balance   int    `json:"balance"`
 }
 
 func (u *User) ToResponse() UserResponse {
 	return UserResponse{
-		ID:       u.ID,
-		Username: u.Username,
-		Balance:  u.Balance,
+		ID:        u.ID,
+		Username:  u.Username,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		Balance:   u.Balance,
 	}
 }

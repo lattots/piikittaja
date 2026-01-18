@@ -10,6 +10,7 @@ import (
 type TransactionHandler interface {
 	Withdraw(user *models.User, amount int) (int, error)
 	Deposit(user *models.User, amount int) (int, error)
+	GetTransactions(user *models.User, quantity int) ([]*models.Transaction, error)
 }
 
 var ErrNotEnoughBalance = errors.New("user doesn't have enough balance to withdraw the amount")
@@ -58,4 +59,8 @@ func (h *transactionHandler) Deposit(user *models.User, amount int) (int, error)
 	user.Balance += amount
 
 	return id, nil
+}
+
+func (h *transactionHandler) GetTransactions(user *models.User, quantity int) ([]*models.Transaction, error) {
+	return h.store.getTransactions(user.ID, quantity)
 }

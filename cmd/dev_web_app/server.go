@@ -27,6 +27,7 @@ func main() {
 	// API routes
 	router.HandleFunc("GET /users/{userId}", h.GetUserByID)
 	router.HandleFunc("GET /users", h.GetUsers)
+	router.HandleFunc("GET /users/{userId}/transactions", h.GetTransactions)
 	router.HandleFunc("POST /users/{userId}/transactions", h.NewTransaction)
 
 	const port = ":8080"

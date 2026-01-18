@@ -12,14 +12,14 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: A list of users
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: "#/components/schemas/User"
 
   /users/{userId}:
     get:
@@ -31,16 +31,31 @@ paths:
           schema:
             type: integer
       responses:
-        '200':
+        "200":
           description: User found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '404':
+                $ref: "#/components/schemas/User"
+        "404":
           description: User not found
 
   /users/{userId}/transactions:
+    get:
+      summary: Get user transactions
+      parameter:
+        - name: quantity
+          in: query
+          schema:
+            type: quantity
+      response:
+        "200":
+          description: Transactions found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transactions"
+
     post:
       summary: Create a transaction
       parameters:
@@ -54,15 +69,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Transaction'
+              $ref: "#/components/schemas/Transaction"
       responses:
-        '201':
+        "201":
           description: Transaction successful
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '402':
+                $ref: "#/components/schemas/User"
+        "402":
           description: Insufficient funds
 
 components:
@@ -80,5 +95,6 @@ components:
       required: [type, amount]
       properties:
         issuer: { type: string }
+        issuedAt: { type: date-time, description: "Time stamp of transaction as RFC3339"}
         type: { type: string, enum: [withdraw, deposit] }
         amount: { type: integer, description: "Amount in cents" }
