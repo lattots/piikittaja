@@ -220,7 +220,7 @@ transaction-table {
 
 @keyframes flash-green {
   0% {
-    background-color: #54df6060;
+    background-color: rgba(var(--green-base), 0.4);
   }
   100% {
     background-color: transparent;
@@ -229,7 +229,7 @@ transaction-table {
 
 @keyframes flash-red {
   0% {
-    background-color: #ff827060;
+    background-color: rgba(var(--red-base), 0.4);
   }
   100% {
     background-color: transparent;
