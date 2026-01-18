@@ -4,7 +4,7 @@ body {
 
   min-height: 100vh;
 
-  background-image: url("/app/assets/background.webp");
+  background-image: url("assets/background.webp");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -13,6 +13,8 @@ body {
 h1 {
   font-size: 8rem;
   text-align: center;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 h2 {
@@ -27,30 +29,30 @@ p {
   color: white;
 
   outline: none;
-  border-radius: 32px;
+  border-radius: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.5);
 
-  width: 300px;
+  width: 20rem;
   align-items: center;
   align-content: center;
 
   background-color: transparent;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(1rem);
+  -webkit-backdrop-filter: blur(1rem);
 }
 
 dialog::backdrop {
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(0.5rem);
 }
 
 #balance-display {
-  padding: 8px;
-  border-radius: 16px;
+  padding: 0.5rem;
+  border-radius: 1rem;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 48px;
+  min-width: 3rem;
 }
 
 :root {
@@ -80,44 +82,55 @@ dialog::backdrop {
   max-height: 32px;
 }
 
+#main-container {
+  margin-left: 1.2rem;
+  margin-right: 1.2rem;
+}
+
 .flexbox {
   display: flex;
   justify-content: space-evenly;
   flex-wrap: wrap;
+  gap: 1.2rem;
 }
 
 .container {
   display: flex;
-  margin: 48px;
-  padding: 32px;
-  border-radius: 32px;
+  flex-grow: 1;
+  justify-content: space-evenly;
+  align-items: stretch;
+
+  padding: 1.2rem;
+  border-radius: 1.2rem;
   border: 1px solid rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(0.5rem);
+  -webkit-backdrop-filter: blur(0.5rem);
+}
+
+user-table {
+  width: 100%;
+  display: block;
 }
 
 #user-table {
-  min-width: 90%;
-}
-
-tr {
-  border-spacing: 32px;
+  width: 100%;
+  border-spacing: 0.5rem 1rem;
+  border-collapse: separate;
 }
 
 th {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 4px;
-  padding-right: 4px;
-  min-width: 64px;
-  max-width: 256px;
-  border-radius: 16px;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+
+  width: auto;
+  border-radius: 1.2rem;
   background-color: rgba(255, 255, 255, 0.15);
 }
 
 td {
-  min-width: 64px;
-  max-width: 256px;
+  width: auto;
   text-align: center;
 }
 
@@ -129,12 +142,12 @@ td {
 #tx-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
 .input-group {
   position: relative;
-  width: 80%;
+  width: 100%;
 }
 
 .input-group label {
@@ -159,7 +172,7 @@ input[name="amount"] {
   height: 4rem;
   border: none;
   outline: none;
-  border-radius: 16px;
+  border-radius: 1.2rem;
   background-color: rgba(255, 255, 255, 0.15);
   box-sizing: border-box;
 }
@@ -175,11 +188,12 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 input[type="number"] {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
 .action-buttons {
-  width: 80%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   gap: 1rem;
@@ -188,12 +202,20 @@ input[type="number"] {
 .button {
   flex: 1;
   height: 4rem;
-  border-radius: 16px;
+  border-radius: 1.2rem;
   font-weight: bold;
   font-size: 1rem;
   cursor: pointer;
   border: none;
   transition: background-color 0.2s;
+}
+
+transaction-table {
+  width: 100%;
+}
+
+#transaction-table {
+  width: 100%;
 }
 
 @keyframes flash-green {

@@ -88,7 +88,7 @@ services:
         condition: service_completed_successfully 
 
     environment:
-      HOST_URL: "https://karsimys.stadi.ninja"
+      HOST_URL: "http://localhost"
 
     secrets:
       - db_app_user

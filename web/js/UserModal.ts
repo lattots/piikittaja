@@ -96,7 +96,7 @@ function renderUserInfo(user: User): string {
 	return `
 		<h2>${user.username}</h2>
 		<div class="flexbox" style="justify-content: space-between">
-			<p style="font-weight: bold">${name}</p>
+			<p style="font-weight: bold; align-content: center">${name}</p>
 			<div class="${balanceColorClass}" id="balance-display">
 				<p style="font-weight: bold">${format(user.balance)}</p>
 			</div>

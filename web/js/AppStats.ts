@@ -14,7 +14,7 @@ export class AppStats extends HTMLElement {
 	}
 
 	async render() {
-		this.innerHTML = `<img src="/app/assets/otso.jpg" style="max-width: 200px; max-height: 200px; border-radius: 24px" alt="Nice Statistics:)">`
+		this.innerHTML = `<img src="/app/assets/otso.jpg" style="max-width: 200px; max-height: 200px; border-radius: 1.2rem" alt="Nice Statistics:)">`
 	}
 }
 

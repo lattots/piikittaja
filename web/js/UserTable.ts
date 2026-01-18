@@ -52,7 +52,8 @@ export class UserTable extends HTMLElement {
 		if (!tbody) return;
 
 		tbody.addEventListener('click', (e) => {
-			const row = (e.target as HTMLElement).closest('.user-row');
+			const target = e.target as Element;
+			const row = target.closest('.user-row') as HTMLTableRowElement | null;
 			if (!row) return;
 
 			const userId = row.getAttribute('data-id');

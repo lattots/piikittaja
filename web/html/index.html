@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PiikkiBotti</title>
     <link rel="icon" type="image/png" href="assets/favicon.png" />
-    <link href="/app/style.css" rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
   </head>
   <body>
     <h1>PIIKKI</h1>
-    <div class="flexbox">
-      <div class="container">
+    <div class="flexbox" id="main-container">
+      <div class="container" style="flex-grow: 2">
         <user-table api-url="/api"></user-table>
       </div>
       <div class="container">

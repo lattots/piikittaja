@@ -33,7 +33,7 @@ export class TransactionTable extends HTMLElement {
 		}));
 
 		this.innerHTML = `
-            <table>
+            <table id="transaction-table">
                 <thead style="font-weight: bold">
                     <tr>
 						<th>Aika</th>
@@ -56,7 +56,7 @@ function renderTransaction(transaction: Transaction): string {
 
 	const now = new Date().getTime();
 	const transactionTime = transaction.issuedAt.getTime();
-	const isNew = (now - transactionTime) < 10000;
+	const isNew = (now - transactionTime) < 3000; // 3 s
 
 	let flashClass = "";
 	if (isNew) {
@@ -66,8 +66,8 @@ function renderTransaction(transaction: Transaction): string {
 	return `
         <tr class="${flashClass}">
             <td>${formatDate(transaction.issuedAt)}</td>
-            <td style="text-align: right; padding-right: 8px">${format(transaction.amount)}</td>
-            <td style="max-width: 32px; min-width: 32px">
+            <td style="text-align: right; padding-right: 0.5rem">${format(transaction.amount)}</td>
+            <td style="display: flex; justify-content: center; align-content: center; min-width: 32px">
                 <div style="
                     width: 24px; 
                     height: 24px; 
