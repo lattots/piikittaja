@@ -63,16 +63,25 @@ export class UserModal extends HTMLElement {
 		content.innerHTML = `
 			${renderUserInfo(user)}
 			<transaction-form api-url=${apiUrl} user-id=${user.id}></transaction-form>
-			<br>
 			<transaction-table api-url=${apiUrl} user-id=${user.id}></transaction-table>
         `;
+
+		const txForm = content.querySelector("transaction-form");
+		txForm?.addEventListener("transaction-success", (e: Event) => {
+			const customEvent = e as CustomEvent<User>;
+			const updatedUser = customEvent.detail;
+
+			console.log("New balance received:", updatedUser.balance);
+
+			this.updateContent(updatedUser);
+		});
 	}
 
 	private render() {
 		if (!this.shadowRoot) return;
 		this.shadowRoot.innerHTML = `
 		<style>
-			@import url("/app/style.css");
+			@import url("style.css");
 		</style>
            <dialog class="modal">
                 <div id="content"></div>
@@ -83,14 +92,13 @@ export class UserModal extends HTMLElement {
 
 function renderUserInfo(user: User): string {
 	const name: string = (user.firstName) ? `${user.firstName} ${user.lastName}` : "Matti Meikalainen";
-	const balanceColor: string = (user.balance >= 0) ? "#54DF60" : "#FF8270";
-	const balanceColorWithOpacity: string = balanceColor + "20"
+	const balanceColorClass: string = (user.balance >= 0) ? "green" : "red";
 	return `
 		<h2>${user.username}</h2>
 		<div class="flexbox" style="justify-content: space-between">
 			<p style="font-weight: bold">${name}</p>
-			<div id="balance-display" style="background-color: ${balanceColorWithOpacity}">
-				<p style="font-weight: bold; color: ${balanceColor}">${format(user.balance)}</p>
+			<div class="${balanceColorClass}" id="balance-display">
+				<p style="font-weight: bold">${format(user.balance)}</p>
 			</div>
 		</div>
 	`;

@@ -24,6 +24,7 @@ export class TransactionTable extends HTMLElement {
 
 		if (!rawData || rawData.length === 0) {
 			this.innerHTML = "<p>Tällä käyttäjällä ei ole vielä yhtäkään maksutapahtumaa</p>"
+			return
 		}
 
 		const transactions: Transaction[] = rawData.map(t => ({

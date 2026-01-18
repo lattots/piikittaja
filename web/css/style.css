@@ -11,8 +11,16 @@ body {
 }
 
 h1 {
-  font-size: 128px;
+  font-size: 8rem;
   text-align: center;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+p {
+  font-size: 1rem;
 }
 
 .modal {
@@ -43,6 +51,29 @@ dialog::backdrop {
   align-items: center;
   justify-content: center;
   min-width: 48px;
+}
+
+:root {
+  --green-base: 84, 223, 96;
+  --red-base: 255, 130, 112;
+}
+
+.green {
+  background-color: rgba(var(--green-base), 0.2);
+  color: rgb(var(--green-base));
+}
+
+.button.green:hover {
+  background-color: rgba(var(--green-base), 0.4);
+}
+
+.red {
+  background-color: rgba(var(--red-base), 0.2);
+  color: rgb(var(--red-base));
+}
+
+.button.red:hover {
+  background-color: rgba(var(--red-base), 0.4);
 }
 
 #transaction-icon {
@@ -88,6 +119,81 @@ td {
   min-width: 64px;
   max-width: 256px;
   text-align: center;
+}
+
+.transaction-container {
+  margin: 2rem auto;
+  text-align: center;
+}
+
+#tx-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-group {
+  position: relative;
+  width: 80%;
+}
+
+.input-group label {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+
+  font-size: 1.5rem;
+  font-weight: bold;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+input[name="amount"] {
+  color: white;
+  width: 100%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+
+  height: 4rem;
+  border: none;
+  outline: none;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.15);
+  box-sizing: border-box;
+}
+
+input[name="amount"]:focus {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.action-buttons {
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.button {
+  flex: 1;
+  height: 4rem;
+  border-radius: 16px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
 }
 
 .gsi-material-button {

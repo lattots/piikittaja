@@ -1,10 +1,12 @@
+import { User } from "./models";
+
 export class TransactionForm extends HTMLElement {
 	constructor() {
 		super();
 	}
 
 	connectedCallback() {
-		this.innerHTML = `<p>Loading transaction form...</p>`
+		this.innerHTML = `<p style="font-weight: bold">Loading transaction form...</p>`
 		this.render();
 	}
 
@@ -14,15 +16,15 @@ export class TransactionForm extends HTMLElement {
 
 	render() {
 		this.innerHTML = `
-			<div>
-				<form id="tx-form">
-					<div>
-						<label>Summa</label>
-						<input type="number" name="amount" step="0.01" required placeholder="esim. 6.70">
+			<div class="transaction-container">
+				<form id="tx-form" autocomplete="off">
+					<div class="input-group">
+						<input id="amount-input" type="number" name="amount" min="0" step="0.01" required placeholder="0.00">
+						<label for="amount-input">€</label>
 					</div>
-					<div>
-						<button type="submit" name="type" value="deposit" class="submit-button">Talleta</button>
-						<button type="submit" name="type" value="withdraw" class="submit-button">Nosta</button>
+					<div class="action-buttons">
+						<button class="button green" type="submit" name="type" value="deposit">Talleta</button>
+						<button class="button red" type="submit" name="type" value="withdraw">Nosta</button>
 					</div>
 				</form>
 				<div id="status"></div>
@@ -38,15 +40,15 @@ export class TransactionForm extends HTMLElement {
 		txFormEl.addEventListener("submit", (e: Event) => this.handleSubmit(e));
 	}
 
-	async handleSubmit(event: Event) {
-		if (!event) return
-		event.preventDefault()
+	async handleSubmit(e: Event) {
+		if (!e) return
+		e.preventDefault()
 
-		const submitEvent = event as SubmitEvent
+		const submitEvent = e as SubmitEvent
 		const submitter = submitEvent.submitter as HTMLButtonElement
 		const type = submitter.value; // "deposit" or "withdraw"
 
-		const form = event.target as HTMLFormElement
+		const form = e.target as HTMLFormElement
 		if (!form) return
 
 		const statusEl = this.querySelector("#status") as HTMLElement
@@ -78,17 +80,23 @@ export class TransactionForm extends HTMLElement {
 				})
 			});
 
-			const errorMsg: string = await response.text()
-			console.log(errorMsg)
-
 			if (response.ok) {
 				statusEl.textContent = `Tapahtuma onnistui!`
 				statusEl.style.color = "#54DF60"
 				form.reset();
+
+				const updatedUser: User = await response.json();
+
+				this.dispatchEvent(new CustomEvent("transaction-success", {
+					bubbles: true,
+					composed: true,
+					detail: updatedUser
+				}));
 			} else if (response.status === 402) {
 				statusEl.textContent = "Rahat on loppu:("
 				statusEl.style.color = "#FF8270"
 			} else {
+				const errorMsg: string = await response.text()
 				statusEl.textContent = `Tapahtuma epäonnistui: ${errorMsg}`
 				statusEl.style.color = "#FF8270"
 			}
