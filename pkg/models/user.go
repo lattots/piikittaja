@@ -9,8 +9,14 @@ type User struct {
 	IsAdmin   bool
 }
 
-func NewUser(id int, username string) *User {
-	return &User{ID: id, Username: username, Balance: 0}
+func NewUser(id int, username, firstName, lastName string) *User {
+	return &User{
+		ID:        id,
+		Username:  username,
+		FirstName: firstName,
+		LastName:  lastName,
+		Balance:   0,
+	}
 }
 
 type UserResponse struct {
