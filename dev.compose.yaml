@@ -59,13 +59,27 @@ services:
     build:
       context: ./web
       dockerfile: build.Dockerfile
+
     volumes:
       - web_assets:/app/build
+
+    develop:
+      watch:
+        - path: ./web
+          action: rebuild
 
   web_app:
     build:
       context: .
       dockerfile: ./cmd/dev_web_app/Dockerfile
+
+    develop:
+      watch:
+        - path: ./cmd/dev_web_app
+          action: rebuild
+        - path: ./pkg
+          action: rebuild
+
     container_name: piikki_dev_web
     restart: unless-stopped
 
