@@ -54,8 +54,17 @@ function renderTransaction(transaction: Transaction): string {
 	const iconColor: string = (transaction.type === "deposit") ? "#54DF60" : "#FF8270";
 	const iconPath: string = assetDir + typeIconSource;
 
+	const now = new Date().getTime();
+	const transactionTime = transaction.issuedAt.getTime();
+	const isNew = (now - transactionTime) < 10000;
+
+	let flashClass = "";
+	if (isNew) {
+		flashClass = (transaction.type === "deposit") ? "new-deposit" : "new-withdraw";
+	}
+
 	return `
-        <tr>
+        <tr class="${flashClass}">
             <td>${formatDate(transaction.issuedAt)}</td>
             <td style="text-align: right; padding-right: 8px">${format(transaction.amount)}</td>
             <td style="max-width: 32px; min-width: 32px">

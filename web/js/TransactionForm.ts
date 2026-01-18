@@ -81,8 +81,6 @@ export class TransactionForm extends HTMLElement {
 			});
 
 			if (response.ok) {
-				statusEl.textContent = `Tapahtuma onnistui!`
-				statusEl.style.color = "#54DF60"
 				form.reset();
 
 				const updatedUser: User = await response.json();

@@ -196,6 +196,32 @@ input[type="number"] {
   transition: background-color 0.2s;
 }
 
+@keyframes flash-green {
+  0% {
+    background-color: #54df6060;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes flash-red {
+  0% {
+    background-color: #ff827060;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.new-deposit {
+  animation: flash-green 2s ease-out;
+}
+
+.new-withdraw {
+  animation: flash-red 2s ease-out;
+}
+
 .gsi-material-button {
   background-color: white;
   border: 1px solid #dadce0;
