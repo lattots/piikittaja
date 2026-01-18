@@ -99,12 +99,10 @@ func (h *handler) defaultHandler(ctx context.Context, b *bot.Bot, update *tgmode
 		return
 	}
 
-	successMsg := fmt.Sprintf("Onnistui! Nauti herkuistasi:)\nNykyinen piikkisi on %s", amountparser.String(u.Balance))
-	err = telegramutil.SendMessage(ctx, b, sender.ID, successMsg)
+	err = sendPaymentConfirmation(ctx, b, u, amount)
 	if err != nil {
-		log.Printf("error while sending message to %s: %s\n", sender.Username, err)
+		log.Printf("error while sending payment confirmation to %s: %s\n", sender.Username, err)
 		handleInternalError(ctx, b, sender)
-		return
 	}
 }
 
@@ -339,6 +337,22 @@ func (h *handler) handlePaymentReminder(ctx context.Context, b *bot.Bot, update 
 		log.Printf("error sending message to user \"%s\": %s", sender.Username, err)
 		return
 	}
+}
+
+const assetDirectory = "./assets/telegram_bot/"
+
+func sendPaymentConfirmation(ctx context.Context, b *bot.Bot, u *models.User, amount int) error {
+	userID := int64(u.ID)
+	photo := fmt.Sprintf("%s%d.webp", assetDirectory, amount)
+	msg := fmt.Sprintf("Onnistui! Nauti herkuistasi:)\nNykyinen piikkisi on %s", amountparser.String(u.Balance))
+
+	params, err := telegramutil.GetSendPhotoParams(userID, photo, msg)
+	if err != nil {
+		return err
+	}
+
+	_, err = b.SendPhoto(ctx, params)
+	return err
 }
 
 func isValidAmount(amount int) bool {

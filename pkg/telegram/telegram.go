@@ -1,10 +1,14 @@
 package telegramutil
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 )
 
 func SendMessage(ctx context.Context, b *bot.Bot, id int64, msg string) error {
@@ -25,4 +29,28 @@ func SendMessageToAll(ctx context.Context, b *bot.Bot, ids []int64, msg string) 
 	}
 
 	return nil
+}
+
+func GetSendPhotoParams(userID int64, photoFilepath, message string) (*bot.SendPhotoParams, error) {
+	photoFile, err := os.Open(photoFilepath)
+	if err != nil {
+		return nil, fmt.Errorf("error opening photo file %w", err)
+	}
+
+	_, filename := filepath.Split(photoFilepath)
+
+	reader := bufio.NewReader(photoFile)
+
+	photo := &models.InputFileUpload{
+		Filename: filename,
+		Data:     reader,
+	}
+
+	params := &bot.SendPhotoParams{
+		ChatID:  userID,
+		Photo:   photo,
+		Caption: message,
+	}
+
+	return params, nil
 }
