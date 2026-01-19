@@ -105,6 +105,7 @@ func (h *handler) defaultHandler(ctx context.Context, b *bot.Bot, update *tgmode
 		handleInternalError(ctx, b, sender)
 	}
 
+	u.Username = sender.Username
 	u.FirstName = sender.FirstName
 	u.LastName = sender.LastName
 	err = h.usrStore.Update(u)
@@ -176,6 +177,7 @@ func (h *handler) handleGetBalance(ctx context.Context, b *bot.Bot, update *tgmo
 		log.Printf("error sending error message to user %s: %s", sender.Username, err)
 	}
 
+	u.Username = sender.Username
 	u.FirstName = sender.FirstName
 	u.LastName = sender.LastName
 	err = h.usrStore.Update(u)
