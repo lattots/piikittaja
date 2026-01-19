@@ -39,6 +39,12 @@ p {
   background-color: transparent;
   backdrop-filter: blur(1rem);
   -webkit-backdrop-filter: blur(1rem);
+
+  max-height: 70vh;
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 dialog::backdrop {

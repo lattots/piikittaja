@@ -15,7 +15,7 @@ export class TransactionTable extends HTMLElement {
 		const userId = this.getAttribute("user-id");
 		const apiUrl = this.getAttribute("api-url");
 
-		const transactionQuantity: number = 10;
+		const transactionQuantity: number = 30;
 
 		const resp = await fetch(`${apiUrl}/users/${userId}/transactions?quantity=${transactionQuantity}`)
 		if (resp.status === 401 || resp.status === 403) {
