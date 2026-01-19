@@ -103,19 +103,19 @@ func RequireAuthentication(handlerFunc http.HandlerFunc, auth *Service) http.Han
 		usr, err := auth.GetSessionUser(r)
 		if err != nil {
 			log.Println("User is not authenticated!")
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
 		isAdmin, err := auth.adminStore.IsAdmin(usr.Email)
 		if err != nil {
 			log.Printf("error checking if user is admin: %s\n", err)
-			http.Redirect(w, r, "/login", http.StatusInternalServerError)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		if !isAdmin {
 			log.Println("User is not authorized to access this resource")
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 
