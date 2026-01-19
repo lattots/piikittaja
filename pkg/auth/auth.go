@@ -132,5 +132,5 @@ func buildCallbackURL(provider string) string {
 	} else {
 		url = os.Getenv("HOST_URL")
 	}
-	return fmt.Sprintf("%s/auth/%s/callback", url, provider)
+	return fmt.Sprintf("%s/api/auth/%s/callback", url, provider)
 }
