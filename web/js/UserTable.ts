@@ -18,6 +18,10 @@ export class UserTable extends HTMLElement {
 
 	async render() {
 		const resp = await fetch(`${this.apiUrl}/users`)
+		if (resp.status === 401 || resp.status === 403) {
+			window.location.href = '/login';
+			return;
+		}
 		if (!resp.ok) return;
 
 		const users: User[] = await resp.json()

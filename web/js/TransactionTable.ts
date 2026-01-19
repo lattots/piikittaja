@@ -18,6 +18,11 @@ export class TransactionTable extends HTMLElement {
 		const transactionQuantity: number = 10;
 
 		const resp = await fetch(`${apiUrl}/users/${userId}/transactions?quantity=${transactionQuantity}`)
+		if (resp.status === 401 || resp.status === 403) {
+			window.location.href = '/login';
+			return;
+		}
+
 		if (!resp.ok) return;
 
 		const rawData: any[] = await resp.json();

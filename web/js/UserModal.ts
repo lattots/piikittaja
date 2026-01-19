@@ -48,6 +48,10 @@ export class UserModal extends HTMLElement {
 
 		try {
 			const resp = await fetch(`${apiUrl}/users/${userId}`);
+			if (resp.status === 401 || resp.status === 403) {
+				window.location.href = '/login';
+				return;
+			}
 			const user = await resp.json();
 			this.updateContent(user);
 		} catch (err) {

@@ -80,6 +80,11 @@ export class TransactionForm extends HTMLElement {
 				})
 			});
 
+			if (response.status === 401 || response.status === 403) {
+				window.location.href = '/login';
+				return;
+			}
+
 			if (response.ok) {
 				form.reset();
 
