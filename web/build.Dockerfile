@@ -11,6 +11,7 @@ RUN mkdir /dist && \
 	mkdir /dist/assets && \
 	mv index.js /dist/index.js && \
 	cp html/index.html /dist/index.html && \
+	cp html/login.html /dist/login.html && \
 	cp assets/* /dist/assets && \
 	cp css/style.css /dist/style.css
 

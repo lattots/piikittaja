@@ -1,4 +1,3 @@
-# Use Go version 1.20 on Alpine OS for building
 FROM golang:1.23.2-alpine AS builder
 
 # Set the working directory inside the container

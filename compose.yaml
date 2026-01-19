@@ -81,10 +81,19 @@ services:
         exec telegram-bot
       "
 
+  web_builder:
+    build:
+      context: ./web
+      dockerfile: build.Dockerfile
+
+    volumes:
+      - web_assets:/app/build
+
   web_app:
     build:
       context: .
       dockerfile: ./cmd/web_app/Dockerfile
+
     container_name: piikki_web
     restart: unless-stopped
 
@@ -117,9 +126,6 @@ services:
         exec web-app
       "
 
-    ports:
-      - 3000:3000
-
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -131,6 +137,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./certbot/www:/var/www/certbot:ro
       - ./certbot/conf:/etc/nginx/ssl:ro
+      - web_assets:/var/www/static:ro
     depends_on:
       web_app:
         condition: service_started
@@ -151,6 +158,8 @@ services:
 volumes:
   db_data:
     driver: local
+
+  web_assets:
 
 secrets:
   db_root_password:
