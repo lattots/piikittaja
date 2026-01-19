@@ -29,7 +29,7 @@ func main() {
 	router.HandleFunc("GET /users/{userId}", auth.RequireAuthentication(h.GetUserByID, h.Auth))
 	router.HandleFunc("GET /users", auth.RequireAuthentication(h.GetUsers, h.Auth))
 	router.HandleFunc("GET /users/{userId}/transactions", auth.RequireAuthentication(h.GetTransactions, h.Auth))
-	router.HandleFunc("POST /transactions", auth.RequireAuthentication(h.NewTransaction, h.Auth))
+	router.HandleFunc("POST /users/{userId}/transactions", auth.RequireAuthentication(h.NewTransaction, h.Auth))
 
 	// Auth
 	router.HandleFunc("GET /auth/{provider}/callback", h.HandleAuthCallback)
