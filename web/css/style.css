@@ -11,7 +11,7 @@ body {
 }
 
 h1 {
-  font-size: 8rem;
+  font-size: clamp(2rem, 20vw, 8rem);
   text-align: center;
   margin-left: 0;
   margin-right: 0;
@@ -114,19 +114,35 @@ user-table {
 
 #user-table {
   width: 100%;
-  border-spacing: 0.5rem 1rem;
+  border-spacing: 0 0.5rem;
   border-collapse: separate;
 }
 
 th {
+  font-size: 1.2rem;
+  width: auto;
+}
+
+.user-row td {
+  background-color: rgba(255, 255, 255, 0.15);
   padding-top: 1rem;
   padding-bottom: 1rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+  border-top: none;
+  border-bottom: none;
+}
 
-  width: auto;
-  border-radius: 1.2rem;
-  background-color: rgba(255, 255, 255, 0.15);
+.user-row td:first-child {
+  border-radius: 1.2rem 0 0 1.2rem;
+  padding-left: 1rem;
+}
+
+.user-row td:last-child {
+  border-radius: 0 1.2rem 1.2rem 0;
+  padding-right: 1rem;
+}
+
+.user-row {
+  padding: 0;
 }
 
 td {
@@ -215,7 +231,15 @@ transaction-table {
 }
 
 #transaction-table {
+  border-collapse: separate;
+  border-spacing: 1rem 0.5rem;
   width: 100%;
+}
+
+#transaction-table th {
+  padding: 1rem 0.5rem 1rem 0.5rem;
+  border-radius: 1rem;
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 @keyframes flash-green {
@@ -237,11 +261,11 @@ transaction-table {
 }
 
 .new-deposit {
-  animation: flash-green 2s ease-out;
+  animation: flash-green 3s ease-out;
 }
 
 .new-withdraw {
-  animation: flash-red 2s ease-out;
+  animation: flash-red 3s ease-out;
 }
 
 .gsi-material-button {

@@ -36,7 +36,7 @@ export class UserTable extends HTMLElement {
                         <tr class="user-row" data-id="${user.id}" style="cursor: pointer;">
                             <td>${user.firstName} ${user.lastName}</td>
                             <td>${user.username}</td>
-                            <td style="text-align: right; padding-right: 8px">${format(user.balance)}</td>
+                            <td style="text-align: right; padding-right: 1.2rem">${format(user.balance)}</td>
                         </tr>
                     `).join("")}
                 </tbody>
@@ -48,19 +48,19 @@ export class UserTable extends HTMLElement {
 	}
 
 	setupEventListeners() {
-		const tbody = this.querySelector('tbody');
+		const tbody = this.querySelector("tbody");
 		if (!tbody) return;
 
-		tbody.addEventListener('click', (e) => {
+		tbody.addEventListener("click", (e) => {
 			const target = e.target as Element;
-			const row = target.closest('.user-row') as HTMLTableRowElement | null;
+			const row = target.closest(".user-row") as HTMLTableRowElement | null;
 			if (!row) return;
 
-			const userId = row.getAttribute('data-id');
-			const modal = this.querySelector('#global-modal') as any;
+			const userId = row.getAttribute("data-id");
+			const modal = this.querySelector("#global-modal") as any;
 
 			if (modal && userId) {
-				modal.setAttribute('user-id', userId);
+				modal.setAttribute("user-id", userId);
 				modal.open();
 			}
 		});
