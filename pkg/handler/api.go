@@ -37,11 +37,23 @@ func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	usrs, err := h.usrStore.GetUsers()
-	if err != nil {
-		log.Printf("error getting users from store: %s\n", err)
-		http.Error(w, "Failed to get users", http.StatusInternalServerError)
-		return
+	searchTerm := r.URL.Query().Get("searchTerm")
+	var usrs []*models.User
+	var err error
+	if searchTerm == "" {
+		usrs, err = h.usrStore.GetUsers()
+		if err != nil {
+			log.Printf("error getting users from store: %s\n", err)
+			http.Error(w, "Failed to get users", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		usrs, err = h.usrStore.SearchUsers(searchTerm)
+		if err != nil {
+			log.Printf("error searching users in store: %s\n", err)
+			http.Error(w, "Failed to search for users", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	respContent := make([]models.UserResponse, len(usrs))

@@ -107,8 +107,10 @@ func (s *mariaDBStore) SearchUsers(searchTerm string) ([]*models.User, error) {
 		SELECT id, username, firstName, lastName, balance, isAdmin
 		FROM users
 		WHERE username LIKE ?
+			OR firstName LIKE ?
+			OR lastName LIKE ?
     `
-	rows, err := s.db.Query(query, searchTermFormatted)
+	rows, err := s.db.Query(query, searchTermFormatted, searchTermFormatted, searchTermFormatted)
 	if err != nil {
 		return nil, err
 	}
