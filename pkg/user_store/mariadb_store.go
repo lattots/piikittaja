@@ -34,10 +34,19 @@ func (s *mariaDBStore) Close() error {
 }
 
 func (s *mariaDBStore) GetByID(id int) (*models.User, error) {
-	row := s.db.QueryRow("SELECT username, balance, isAdmin FROM users WHERE id=?", id)
+	row := s.db.QueryRow("SELECT username, firstName, lastName, balance, isAdmin FROM users WHERE id=?", id)
 
 	user := &models.User{ID: id}
-	if err := row.Scan(&user.Username, &user.Balance, &user.IsAdmin); err != nil {
+
+	err := row.Scan(
+		&user.Username,
+		&user.FirstName,
+		&user.LastName,
+		&user.Balance,
+		&user.IsAdmin,
+	)
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -45,11 +54,18 @@ func (s *mariaDBStore) GetByID(id int) (*models.User, error) {
 }
 
 func (s *mariaDBStore) GetByUsername(username string) (*models.User, error) {
-	row := s.db.QueryRow("SELECT id, balance, isAdmin FROM users WHERE username=?", username)
+	row := s.db.QueryRow("SELECT id, firstName, lastName, balance, isAdmin FROM users WHERE username=?", username)
 
 	user := &models.User{Username: username}
-	user.Username = username
-	if err := row.Scan(&user.ID, &user.Balance, &user.IsAdmin); err != nil {
+	err := row.Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Balance,
+		&user.IsAdmin,
+	)
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -57,7 +73,7 @@ func (s *mariaDBStore) GetByUsername(username string) (*models.User, error) {
 }
 
 func (s *mariaDBStore) GetUsers() ([]*models.User, error) {
-	rows, err := s.db.Query("SELECT id, username, balance, isAdmin FROM users ORDER BY balance")
+	rows, err := s.db.Query("SELECT id, username, firstName, lastName, balance, isAdmin FROM users ORDER BY balance")
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +83,15 @@ func (s *mariaDBStore) GetUsers() ([]*models.User, error) {
 
 	for rows.Next() {
 		user := new(models.User)
-		err := rows.Scan(&user.ID, &user.Username, &user.Balance, &user.IsAdmin)
+		err := rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.FirstName,
+			&user.LastName,
+			&user.Balance,
+			&user.IsAdmin,
+		)
+
 		if err != nil {
 			return nil, err
 		}
@@ -80,11 +104,13 @@ func (s *mariaDBStore) GetUsers() ([]*models.User, error) {
 func (s *mariaDBStore) SearchUsers(searchTerm string) ([]*models.User, error) {
 	searchTermFormatted := fmt.Sprintf("%%%s%%", searchTerm)
 	query := `
-		SELECT id, username, balance, isAdmin
+		SELECT id, username, firstName, lastName, balance, isAdmin
 		FROM users
 		WHERE username LIKE ?
+			OR firstName LIKE ?
+			OR lastName LIKE ?
     `
-	rows, err := s.db.Query(query, searchTermFormatted)
+	rows, err := s.db.Query(query, searchTermFormatted, searchTermFormatted, searchTermFormatted)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +120,14 @@ func (s *mariaDBStore) SearchUsers(searchTerm string) ([]*models.User, error) {
 
 	for rows.Next() {
 		user := new(models.User)
-		err := rows.Scan(&user.ID, &user.Username, &user.Balance, &user.IsAdmin)
+		err := rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.FirstName,
+			&user.LastName,
+			&user.Balance,
+			&user.IsAdmin,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +138,18 @@ func (s *mariaDBStore) SearchUsers(searchTerm string) ([]*models.User, error) {
 }
 
 func (s *mariaDBStore) Insert(u *models.User) error {
-	result, err := s.db.Exec("INSERT INTO users (id, username, balance, isAdmin) VALUES (?, ?, ?, ?)", u.ID, u.Username, u.Balance, u.IsAdmin)
+	result, err := s.db.Exec(
+		`INSERT INTO users
+		(id, username, firstName, lastName, balance, isAdmin)
+		VALUES
+		(?, ?, ?, ?, ?, ?)`,
+		u.ID,
+		u.Username,
+		u.FirstName,
+		u.LastName,
+		u.Balance,
+		u.IsAdmin,
+	)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate entry") {
 			return ErrUserAlreadyExists
@@ -125,7 +169,16 @@ func (s *mariaDBStore) Insert(u *models.User) error {
 }
 
 func (s *mariaDBStore) Update(u *models.User) error {
-	result, err := s.db.Exec("UPDATE users SET username=?, isAdmin=? WHERE id=?", u.Username, u.IsAdmin, u.ID)
+	result, err := s.db.Exec(
+		`UPDATE users 
+		SET username=?, firstName=?, lastName=?, isAdmin=? 
+		WHERE id=?`,
+		u.Username,
+		u.FirstName,
+		u.LastName,
+		u.IsAdmin,
+		u.ID,
+	)
 	if err != nil {
 		return fmt.Errorf("error executing user update: %w", err)
 	}

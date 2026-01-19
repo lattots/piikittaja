@@ -104,6 +104,14 @@ func (h *handler) defaultHandler(ctx context.Context, b *bot.Bot, update *tgmode
 		log.Printf("error while sending payment confirmation to %s: %s\n", sender.Username, err)
 		handleInternalError(ctx, b, sender)
 	}
+
+	u.FirstName = sender.FirstName
+	u.LastName = sender.LastName
+	err = h.usrStore.Update(u)
+	if err != nil {
+		log.Printf("error updating user %s: %s\n", u.Username, err)
+		return
+	}
 }
 
 func (h *handler) handleStart(ctx context.Context, b *bot.Bot, update *tgmodels.Update) {
@@ -131,7 +139,7 @@ func (h *handler) handleStart(ctx context.Context, b *bot.Bot, update *tgmodels.
 		return
 	}
 
-	u := models.NewUser(int(sender.ID), sender.Username)
+	u := models.NewUser(int(sender.ID), sender.Username, sender.FirstName, sender.LastName)
 	err = h.usrStore.Insert(u)
 	if err != nil {
 		log.Printf("error checking if user %s exists: %s\n", sender.Username, err)
@@ -166,6 +174,14 @@ func (h *handler) handleGetBalance(ctx context.Context, b *bot.Bot, update *tgmo
 	err = telegramutil.SendMessage(context.TODO(), b, int64(sender.ID), msg)
 	if err != nil {
 		log.Printf("error sending error message to user %s: %s", sender.Username, err)
+	}
+
+	u.FirstName = sender.FirstName
+	u.LastName = sender.LastName
+	err = h.usrStore.Update(u)
+	if err != nil {
+		log.Printf("error updating user %s: %s\n", u.Username, err)
+		return
 	}
 }
 

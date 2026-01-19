@@ -1,4 +1,3 @@
-# Use Go version 1.20 on Alpine OS for building
 FROM golang:1.23.2-alpine AS builder
 
 # Set the working directory inside the container
@@ -22,4 +21,3 @@ RUN apt-get update && apt-get install -y ca-certificates
 
 # Copy the binary from the builder stage
 COPY --from=builder /bin/web-app /usr/local/bin/web-app
-COPY ./assets/web_app ./assets/web_app

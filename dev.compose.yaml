@@ -55,10 +55,31 @@ services:
     volumes:
       - ./db:/db
 
+  web_builder:
+    build:
+      context: ./web
+      dockerfile: build.Dockerfile
+
+    volumes:
+      - web_assets:/app/build
+
+    develop:
+      watch:
+        - path: ./web
+          action: rebuild
+
   web_app:
     build:
       context: .
       dockerfile: ./cmd/dev_web_app/Dockerfile
+
+    develop:
+      watch:
+        - path: ./cmd/dev_web_app
+          action: rebuild
+        - path: ./pkg
+          action: rebuild
+
     container_name: piikki_dev_web
     restart: unless-stopped
 
@@ -67,7 +88,7 @@ services:
         condition: service_completed_successfully 
 
     environment:
-      HOST_URL: "https://karsimys.stadi.ninja"
+      HOST_URL: "http://localhost"
 
     secrets:
       - db_app_user
@@ -91,6 +112,7 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx_dev.conf:/etc/nginx/conf.d/default.conf:ro
+      - web_assets:/var/www/static:ro
     depends_on:
       web_app:
         condition: service_started
@@ -98,6 +120,8 @@ services:
 volumes:
   db_data:
     driver: local
+
+  web_assets:
 
 secrets:
   db_root_password:

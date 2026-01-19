@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -13,24 +14,23 @@ import (
 func main() {
 	router := http.NewServeMux()
 
-	// Serve static files from the 'assets/web_app' directory
-	staticFileHandler := http.StripPrefix("/assets/web_app/", http.FileServer(http.Dir("./assets/web_app")))
-	router.Handle("/assets/web_app/", staticFileHandler)
+	host := os.Getenv("HOST_URL")
+	if host == "" {
+		log.Fatalln("HOST_URL not provided in environment variables")
+	}
 
-	h, err := handler.NewHandler()
+	h, err := handler.NewHandler(host)
 	if err != nil {
 		log.Fatalln("error creating new handler:", err)
 	}
 
-	// Views
-	router.HandleFunc("/", h.HandleIndex)
-	router.HandleFunc("GET /user-view", h.HandleUserView)
-	router.HandleFunc("GET /login", h.HandleLogin)
+	// API routes
+	router.HandleFunc("GET /users/{userId}", h.GetUserByID)
+	router.HandleFunc("GET /users", h.GetUsers)
+	router.HandleFunc("GET /users/{userId}/transactions", h.GetTransactions)
+	router.HandleFunc("POST /users/{userId}/transactions", h.NewTransaction)
 
-	// Actions
-	router.HandleFunc("POST /action", h.HandleUserAction)
-
-	const port = ":3000"
+	const port = ":8080"
 	fmt.Printf("Server started on port %s\n", port)
 
 	if err = http.ListenAndServe(port, router); err != nil {
