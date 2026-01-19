@@ -110,6 +110,28 @@ dialog::backdrop {
 user-table {
   width: 100%;
   display: block;
+  max-height: 70vh;
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+user-table::-webkit-scrollbar {
+  width: 8px;
+}
+
+user-table::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+user-table::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+user-table::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 
 #user-table {
