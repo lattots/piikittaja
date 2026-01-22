@@ -113,6 +113,30 @@ dialog::backdrop {
   -webkit-backdrop-filter: blur(0.5rem);
 }
 
+.search-container {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.search-container input[type="text"] {
+  color: white;
+  width: 100%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+
+  height: 4rem;
+  border: none;
+  outline: none;
+  border-radius: 1.2rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  box-sizing: border-box;
+}
+
+.search-container input[type="text"]:focus {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
 user-table {
   width: 100%;
   display: block;

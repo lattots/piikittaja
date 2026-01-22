@@ -10,7 +10,8 @@
   <body>
     <h1>PIIKKI</h1>
     <div class="flexbox" id="main-container">
-      <div class="container" style="flex-grow: 2">
+      <div class="container" style="flex-grow: 2; flex-direction: column">
+        <search-bar api-url="/api"></search-bar>
         <user-table api-url="/api"></user-table>
       </div>
       <div class="container">
