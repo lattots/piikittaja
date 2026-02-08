@@ -14,9 +14,6 @@ dev:
 	docker compose -f dev.compose.yaml up -d
 	docker compose -f dev.compose.yaml watch
 
-ref:
-	docker compose -f dev.compose.yaml up -d --build web_builder web_app
-
 dev_down:
 	docker compose -f ./dev.compose.yaml down --volumes --remove-orphans
 

@@ -158,6 +158,22 @@ func TestNewTransaction(t *testing.T) {
 	}
 	testUser := originalUsers[0]
 
+	// First set the balance to >= 0
+	if testUser.Balance < 0 {
+		diff := -testUser.Balance
+		reqContent := fmt.Sprintf(`{"type":"deposit", "amount":%d}`, diff)
+		req := httptest.NewRequest("POST", fmt.Sprintf("/users/%d/transactions", testUser.ID), strings.NewReader(reqContent))
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		if rr.Code != http.StatusCreated {
+			t.Errorf("expected 201, got %d", rr.Code)
+		}
+		testUser.Balance = 0
+	}
+
 	const testAmount int = 1000
 	reqContent := fmt.Sprintf(`{"type":"deposit", "amount":%d}`, testAmount)
 
@@ -178,6 +194,7 @@ func TestNewTransaction(t *testing.T) {
 	}
 
 	expectedBalance := testUser.Balance + testAmount
+
 	if respUser.Balance != expectedBalance {
 		t.Errorf("wrong balance in response: want %d got %d", expectedBalance, respUser.Balance)
 	}
@@ -191,12 +208,12 @@ func TestNewTransaction(t *testing.T) {
 	router.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusCreated {
-		t.Errorf("expected 201, got %d", rr.Code)
+		t.Fatalf("expected 201, got %d", rr.Code)
 	}
 
 	err = json.NewDecoder(rr.Body).Decode(&respUser)
 	if err != nil {
-		t.Errorf("unexpected error when decoding response: %s", err)
+		t.Fatalf("unexpected error when decoding response: %s", err)
 	}
 
 	if respUser.Balance != testUser.Balance {
