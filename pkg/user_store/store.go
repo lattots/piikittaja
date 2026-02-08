@@ -8,7 +8,6 @@ import (
 
 type UserStore interface {
 	GetByID(id int) (*models.User, error)
-	GetByUsername(username string) (*models.User, error)
 
 	GetUsers() ([]*models.User, error)
 	SearchUsers(searchTerm string) ([]*models.User, error)
@@ -22,5 +21,7 @@ type UserStore interface {
 	Close() error
 }
 
-var ErrUserAlreadyExists = errors.New("user already exists in database")
-var ErrUserNotExists = errors.New("user doesn't exist in database")
+var (
+	ErrUserAlreadyExists = errors.New("user already exists in database")
+	ErrUserNotExists     = errors.New("user doesn't exist in database")
+)

@@ -45,26 +45,6 @@ func (s *mariaDBStore) GetByID(id int) (*models.User, error) {
 		&user.Balance,
 		&user.IsAdmin,
 	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func (s *mariaDBStore) GetByUsername(username string) (*models.User, error) {
-	row := s.db.QueryRow("SELECT id, firstName, lastName, balance, isAdmin FROM users WHERE username=?", username)
-
-	user := &models.User{Username: username}
-	err := row.Scan(
-		&user.ID,
-		&user.FirstName,
-		&user.LastName,
-		&user.Balance,
-		&user.IsAdmin,
-	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +71,6 @@ func (s *mariaDBStore) GetUsers() ([]*models.User, error) {
 			&user.Balance,
 			&user.IsAdmin,
 		)
-
 		if err != nil {
 			return nil, err
 		}
