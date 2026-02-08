@@ -320,6 +320,22 @@ transaction-table {
   animation: flash-red 3s ease-out;
 }
 
+#app-stats-container {
+  height: 100%;
+  width: 100%;
+  display: block;
+}
+
+app-stats {
+  height: 30vh;
+  display: block;
+}
+
+#chart-canvas {
+  height: 100%;
+  width: 100%;
+}
+
 .gsi-material-button {
   background-color: white;
   border: 1px solid #dadce0;

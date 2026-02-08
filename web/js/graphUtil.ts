@@ -1,9 +1,3 @@
-export function format(monetaryValue: number): string {
-	const euros: number = monetaryValue / 100
-	return `${euros} €`
-}
-
-// utils.ts
 import { Transaction } from './models';
 
 export interface ChartData {
@@ -15,13 +9,11 @@ export interface ChartData {
 export function processTransactionsForGraph(
 	transactions: Transaction[],
 	endDate: Date,
-	daysWindow: number
+	windowDays: number
 ): ChartData {
-	// 1. Create a map of "YYYY-MM-DD" -> Total Amount
 	const sumsByDate = new Map<string, number>();
 
 	transactions.forEach(t => {
-		// Ensure we only process withdraws (double safety)
 		if (t.type !== 'withdraw') return;
 
 		const dateKey = t.issuedAt.toISOString().split('T')[0];
@@ -35,7 +27,7 @@ export function processTransactionsForGraph(
 	let maxVal = 0;
 
 	// Start from (EndDate - Window) up to EndDate
-	for (let i = daysWindow - 1; i >= 0; i--) {
+	for (let i = windowDays - 1; i >= 0; i--) {
 		const d = new Date(endDate);
 		d.setDate(d.getDate() - i);
 

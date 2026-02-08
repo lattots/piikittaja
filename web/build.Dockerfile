@@ -1,7 +1,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /src
 
-RUN npm init -y && npm install --save-dev esbuild
+RUN npm init -y && npm install --save-dev esbuild chart.js
 
 COPY . .
 

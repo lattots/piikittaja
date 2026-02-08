@@ -1,3 +1,5 @@
+import { fetchUserTransactions } from "./api";
+import { ApiError } from "./errors";
 import { Transaction } from "./models";
 import { format } from "./monetaryUtil";
 
@@ -7,35 +9,45 @@ export class TransactionTable extends HTMLElement {
 	}
 
 	async connectedCallback() {
-		this.innerHTML = `<p style="font-weight: bold">Loading transactions...</p>`
-		await this.render()
+		this.innerHTML = `<p>Ladataan maksutapahtumia...</p>`
+		try {
+			await this.render();
+		} catch (err) {
+			this.innerHTML = `<p>Maksutapahtumien lataaminen epäonnistui.</p>`;
+			console.error(err);
+		}
 	}
 
 	async render() {
 		const userId = this.getAttribute("user-id");
-		const apiUrl = this.getAttribute("api-url");
-
-		const transactionQuantity: number = 30;
-
-		const resp = await fetch(`${apiUrl}/users/${userId}/transactions?quantity=${transactionQuantity}`)
-		if (resp.status === 401 || resp.status === 403) {
-			window.location.href = '/login';
-			return;
+		if (!userId) {
+			console.error("user-id not provided for transaction-table")
+			return
 		}
-
-		if (!resp.ok) return;
-
-		const rawData: any[] = await resp.json();
-
-		if (!rawData || rawData.length === 0) {
-			this.innerHTML = "<p>Tällä käyttäjällä ei ole vielä yhtäkään maksutapahtumaa</p>"
+		const apiUrl = this.getAttribute("api-url");
+		if (!apiUrl) {
+			console.error("api-url not provided for transaction-table")
 			return
 		}
 
-		const transactions: Transaction[] = rawData.map(t => ({
-			...t,
-			issuedAt: new Date(t.issuedAt)
-		}));
+		const transactionQuantity: number = 30;
+
+		let transactions: Transaction[];
+		try {
+			transactions = await fetchUserTransactions(apiUrl, userId, transactionQuantity);
+		} catch (error) {
+			if (error instanceof ApiError) {
+				window.location.href = '/login';
+				return;
+			}
+			console.log(error);
+			return;
+		}
+
+		if (transactions.length === 0) {
+			this.innerHTML = "<p>Tällä käyttäjällä ei ole vielä yhtäkään maksutapahtumaa.</p>"
+			return;
+		}
 
 		this.innerHTML = `
             <table id="transaction-table">
