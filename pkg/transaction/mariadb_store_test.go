@@ -30,7 +30,7 @@ func TestMariaDBStore(t *testing.T) {
 	handler := transaction.NewTransactionHandler(traStore)
 
 	const testUserID = 0
-	user := models.NewUser(testUserID, "test user 0")
+	user := models.NewUser(testUserID, "test user 0", "John", "Doe")
 
 	err = usrStore.Insert(user)
 	if err != nil {

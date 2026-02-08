@@ -12,7 +12,7 @@ func TestValidTransactions(t *testing.T) {
 	store := transaction.NewMockStore()
 	handler := transaction.NewTransactionHandler(store)
 
-	user := models.NewUser(0, "test user")
+	user := models.NewUser(0, "test user", "John", "Doe")
 
 	_, err := handler.Deposit(user, 100_00)
 	if err != nil {
@@ -46,7 +46,7 @@ func TestInvalidTransactions(t *testing.T) {
 	store := transaction.NewMockStore()
 	handler := transaction.NewTransactionHandler(store)
 
-	user := models.NewUser(0, "test user")
+	user := models.NewUser(0, "test user", "John", "Doe")
 
 	_, err := handler.Deposit(user, -1)
 	if !errors.Is(err, transaction.ErrInvalidAmount) {

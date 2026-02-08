@@ -3,6 +3,7 @@ package transaction
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/lattots/piikittaja/pkg/models"
 )
@@ -10,11 +11,14 @@ import (
 type TransactionHandler interface {
 	Withdraw(user *models.User, amount int) (int, error)
 	Deposit(user *models.User, amount int) (int, error)
-	GetTransactions(user *models.User, quantity int) ([]*models.Transaction, error)
+	GetUserTransactions(user *models.User, quantity int) ([]*models.Transaction, error)
+	GetTransactions(endDate time.Time, window time.Duration, traType string) ([]*models.Transaction, error)
 }
 
-var ErrNotEnoughBalance = errors.New("user doesn't have enough balance to withdraw the amount")
-var ErrInvalidAmount = errors.New("entered amount is invalid. amount must be greater than 0")
+var (
+	ErrNotEnoughBalance = errors.New("user doesn't have enough balance to withdraw the amount")
+	ErrInvalidAmount    = errors.New("entered amount is invalid. amount must be greater than 0")
+)
 
 // canWithdraw is a helper function to check if user can withdraw specified amount
 func canWithdraw(user *models.User, amount int) bool {
@@ -61,6 +65,10 @@ func (h *transactionHandler) Deposit(user *models.User, amount int) (int, error)
 	return id, nil
 }
 
-func (h *transactionHandler) GetTransactions(user *models.User, quantity int) ([]*models.Transaction, error) {
-	return h.store.getTransactions(user.ID, quantity)
+func (h *transactionHandler) GetUserTransactions(user *models.User, quantity int) ([]*models.Transaction, error) {
+	return h.store.getUserTransactions(user.ID, quantity)
+}
+
+func (h *transactionHandler) GetTransactions(endDate time.Time, window time.Duration, traType string) ([]*models.Transaction, error) {
+	return h.store.getTransactions(endDate, window, traType)
 }

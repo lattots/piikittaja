@@ -54,6 +54,7 @@ paths:
           content:
             application/json:
               schema:
+                type: array
                 $ref: "#/components/schemas/Transactions"
 
     post:
@@ -79,6 +80,41 @@ paths:
                 $ref: "#/components/schemas/User"
         "402":
           description: Insufficient funds
+
+  /transactions:
+    get:
+      summary: Get transactions in a time window (for example transactions from 30 days before Dec 1st)
+      parameters:
+        - name: window
+          description: Length of the time window in hours (max 10 * 365 * 24)
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: endDate
+          description: End of the transaction window in RFC3339 (defaults to the current date if not provided)
+          in: query
+          required: false
+          schema:
+            type: date-time
+        - name: type
+          description: Only include certain transaction types (deposit / withdraw / all)
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                $ref: "#/components/schemas/Transaction"
+        "400":
+          description: Error parsing parameters
+        "416":
+          description: Transaction window is invalid. End date is in the future or window length is negative
 
 components:
   schemas:
