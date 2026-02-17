@@ -1,9 +1,28 @@
-import { fetchTransactions } from "./api";
+import { fetchTransactions } from "./api.ts";
 
-import { Chart, LineController, LineElement, PointElement, LinearScale, Title, CategoryScale, Tooltip, Filler } from "chart.js";
-import { processTransactionsForGraph } from "./graphUtil";
+import {
+	CategoryScale,
+	Chart,
+	Filler,
+	LinearScale,
+	LineController,
+	LineElement,
+	PointElement,
+	Title,
+	Tooltip,
+} from "chart.js";
+import { processTransactionsForGraph } from "./graphUtil.ts";
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Title, Tooltip, Filler);
+Chart.register(
+	LineController,
+	LineElement,
+	PointElement,
+	LinearScale,
+	CategoryScale,
+	Title,
+	Tooltip,
+	Filler,
+);
 
 export class AppStats extends HTMLElement {
 	private chart: Chart | null = null;
@@ -16,7 +35,9 @@ export class AppStats extends HTMLElement {
 		this.shadowRoot!.innerHTML = `
 			<canvas id="chart-canvas"></canvas>
         `;
-		this.canvas = this.shadowRoot!.querySelector("#chart-canvas") as HTMLCanvasElement;
+		this.canvas = this.shadowRoot!.querySelector(
+			"#chart-canvas",
+		) as HTMLCanvasElement;
 	}
 
 	async connectedCallback() {
@@ -24,30 +45,36 @@ export class AppStats extends HTMLElement {
 	}
 
 	private async render() {
-		const apiUrl = this.getAttribute('api-url') || '';
+		const apiUrl = this.getAttribute("api-url") || "";
 		const endDate = new Date();
 
-		// 1. Fetch & Process data (Uses the same logic as before to fill gaps with 0)
-		const rawData = await fetchTransactions(apiUrl, endDate, this.windowDays, 'withdraw');
-		const { dates, values } = processTransactionsForGraph(rawData, endDate, this.windowDays);
+		const rawData = await fetchTransactions(
+			apiUrl,
+			endDate,
+			this.windowDays,
+			"withdraw",
+		);
+		const { dates, values } = processTransactionsForGraph(
+			rawData,
+			endDate,
+			this.windowDays,
+		);
 
-		// 2. Destroy old chart if it exists (for dynamic updates)
 		if (this.chart) this.chart.destroy();
 
-		// 3. Initialize Chart.js
 		this.chart = new Chart(this.canvas, {
-			type: 'line',
+			type: "line",
 			data: {
 				labels: dates,
 				datasets: [{
-					label: 'Withdrawals (Cents)',
+					label: "Withdrawals (Cents)",
 					data: values,
-					borderColor: '#4A90E2',
-					backgroundColor: 'rgba(74, 144, 226, 0.1)',
+					borderColor: "rgb(255, 130, 112)",
+					backgroundColor: "rgba(255, 130, 112, 0.15)",
 					fill: true,
 					tension: 0.3,
 					pointRadius: this.windowDays > 60 ? 0 : 3,
-				}]
+				}],
 			},
 			options: {
 				responsive: true,
@@ -58,27 +85,33 @@ export class AppStats extends HTMLElement {
 						ticks: {
 							autoSkip: true,
 							maxRotation: 0,
-							callback: (val, index) => {
+							callback: (val: any, index: any) => {
 								const d = new Date(dates[index]);
-								return d.toLocaleString('default', { month: 'short', day: 'numeric' });
-							}
-						}
+								return d.toLocaleString("default", {
+									month: "short",
+									day: "numeric",
+								});
+							},
+						},
 					},
 					y: {
 						beginAtZero: true,
 						ticks: {
-							callback: (value) => `${(Number(value) / 100).toFixed(0)} €`
-						}
-					}
+							callback: (value: any) =>
+								`${(Number(value) / 100).toFixed(0)} €`,
+						},
+					},
 				},
 				plugins: {
 					tooltip: {
 						callbacks: {
-							label: (ctx) => `Summa: ${(ctx.parsed.y / 100).toLocaleString()} €`
-						}
-					}
-				}
-			}
+							label: (ctx: any) =>
+								`Summa: ${(ctx.parsed.y / 100).toLocaleString()
+								} €`,
+						},
+					},
+				},
+			},
 		});
 	}
 }

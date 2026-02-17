@@ -1,89 +1,87 @@
-import { User } from "./models";
-import { format } from "./monetaryUtil";
-import "./TransactionTable"
-import "./TransactionForm"
+import { User } from "./models.ts";
+import { format } from "./monetaryUtil.ts";
+import "./TransactionTable.ts";
+import "./TransactionForm.ts";
 
 export class UserModal extends HTMLElement {
-	private dialog: HTMLDialogElement | null = null;
+  private dialog: HTMLDialogElement | null = null;
 
-	constructor() {
-		super();
-		this.attachShadow({ mode: "open" });
-	}
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
 
-	connectedCallback() {
-		this.render();
-		this.dialog = this.shadowRoot?.querySelector("dialog") || null;
+  connectedCallback() {
+    this.render();
+    this.dialog = this.shadowRoot?.querySelector("dialog") || null;
 
-		if (this.dialog) {
-			this.dialog.addEventListener('click', (e) => {
-				if (!this.dialog) return;
+    if (this.dialog) {
+      this.dialog.addEventListener("click", (e) => {
+        if (!this.dialog) return;
 
-				const rect = this.dialog.getBoundingClientRect();
+        const rect = this.dialog.getBoundingClientRect();
 
-				const isClickOutside = (
-					e.clientX < rect.left ||
-					e.clientX > rect.right ||
-					e.clientY < rect.top ||
-					e.clientY > rect.bottom
-				);
+        const isClickOutside = e.clientX < rect.left ||
+          e.clientX > rect.right ||
+          e.clientY < rect.top ||
+          e.clientY > rect.bottom;
 
-				if (isClickOutside) {
-					this.dialog.close();
-				}
-			});
-		}
-	}
+        if (isClickOutside) {
+          this.dialog.close();
+        }
+      });
+    }
+  }
 
-	async open() {
-		if (!this.dialog) return;
+  async open() {
+    if (!this.dialog) return;
 
-		const userId = this.getAttribute("user-id");
-		const apiUrl = this.getAttribute("api-url");
+    const userId = this.getAttribute("user-id");
+    const apiUrl = this.getAttribute("api-url");
 
-		const content = this.shadowRoot?.querySelector("#content");
-		if (content) content.innerHTML = "<p>Loading details...</p>";
+    const content = this.shadowRoot?.querySelector("#content");
+    if (content) content.innerHTML = "<p>Loading details...</p>";
 
-		this.dialog.showModal();
+    this.dialog.showModal();
 
-		try {
-			const resp = await fetch(`${apiUrl}/users/${userId}`);
-			if (resp.status === 401 || resp.status === 403) {
-				window.location.href = '/login';
-				return;
-			}
-			const user = await resp.json();
-			this.updateContent(user);
-		} catch (err) {
-			if (content) content.innerHTML = "<p>Error loading user.</p>";
-		}
-	}
+    try {
+      const resp = await fetch(`${apiUrl}/users/${userId}`);
+      if (resp.status === 401 || resp.status === 403) {
+        window.location.href = "/login";
+        return;
+      }
+      const user = await resp.json();
+      this.updateContent(user);
+    } catch (err) {
+      if (content) content.innerHTML = "<p>Error loading user.</p>";
+    }
+  }
 
-	private updateContent(user: User) {
-		const apiUrl = this.getAttribute("api-url");
-		const content = this.shadowRoot?.querySelector("#content");
-		if (!content) return;
+  private updateContent(user: User) {
+    const apiUrl = this.getAttribute("api-url");
+    const content = this.shadowRoot?.querySelector("#content");
+    if (!content) return;
 
-		content.innerHTML = `
+    content.innerHTML = `
 			${renderUserInfo(user)}
 			<transaction-form api-url=${apiUrl} user-id=${user.id}></transaction-form>
 			<transaction-table api-url=${apiUrl} user-id=${user.id}></transaction-table>
         `;
 
-		const txForm = content.querySelector("transaction-form");
-		txForm?.addEventListener("transaction-success", (e: Event) => {
-			const customEvent = e as CustomEvent<User>;
-			const updatedUser = customEvent.detail;
+    const txForm = content.querySelector("transaction-form");
+    txForm?.addEventListener("transaction-success", (e: Event) => {
+      const customEvent = e as CustomEvent<User>;
+      const updatedUser = customEvent.detail;
 
-			console.log("New balance received:", updatedUser.balance);
+      console.log("New balance received:", updatedUser.balance);
 
-			this.updateContent(updatedUser);
-		});
-	}
+      this.updateContent(updatedUser);
+    });
+  }
 
-	private render() {
-		if (!this.shadowRoot) return;
-		this.shadowRoot.innerHTML = `
+  private render() {
+    if (!this.shadowRoot) return;
+    this.shadowRoot.innerHTML = `
 		<style>
 			@import url("style.css");
 		</style>
@@ -91,13 +89,15 @@ export class UserModal extends HTMLElement {
                 <div id="content"></div>
             </dialog>
         `;
-	}
+  }
 }
 
 function renderUserInfo(user: User): string {
-	const name: string = (user.firstName) ? `${user.firstName} ${user.lastName}` : "Matti Meikalainen";
-	const balanceColorClass: string = (user.balance >= 0) ? "green" : "red";
-	return `
+  const name: string = (user.firstName)
+    ? `${user.firstName} ${user.lastName}`
+    : "Matti Meikalainen";
+  const balanceColorClass: string = (user.balance >= 0) ? "green" : "red";
+  return `
 		<h2>${user.username}</h2>
 		<div class="flexbox" style="justify-content: space-between">
 			<p style="font-weight: bold; align-content: center">${name}</p>
