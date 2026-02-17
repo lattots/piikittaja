@@ -91,6 +91,7 @@ dialog::backdrop {
 #main-container {
   margin-left: 1.2rem;
   margin-right: 1.2rem;
+  flex-direction: row;
 }
 
 .flexbox {
@@ -102,7 +103,6 @@ dialog::backdrop {
 
 .container {
   display: flex;
-  flex-grow: 1;
   justify-content: space-evenly;
   align-items: stretch;
 
@@ -111,6 +111,12 @@ dialog::backdrop {
   border: 1px solid rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(0.5rem);
   -webkit-backdrop-filter: blur(0.5rem);
+}
+
+#user-view-container {
+  flex: 2;
+  flex-direction: column;
+  min-width: 300px;
 }
 
 .search-container {
@@ -131,6 +137,11 @@ dialog::backdrop {
   border-radius: 1.2rem;
   background-color: rgba(255, 255, 255, 0.15);
   box-sizing: border-box;
+  transition: background-color 0.3s ease;
+}
+
+.search-container input[type="text"]:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .search-container input[type="text"]:focus {
@@ -172,15 +183,20 @@ user-table::-webkit-scrollbar-thumb:hover {
 
 th {
   font-size: 1.2rem;
-  width: auto;
+}
+
+td {
+  text-align: center;
 }
 
 .user-row td {
   background-color: rgba(255, 255, 255, 0.15);
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  border-top: none;
-  border-bottom: none;
+  padding: 1rem 0;
+  transition: background-color 0.3s ease;
+}
+
+.user-row:hover td {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .user-row td:first-child {
@@ -191,10 +207,6 @@ th {
 .user-row td:last-child {
   border-radius: 0 1.2rem 1.2rem 0;
   padding-right: 1rem;
-}
-
-.user-row {
-  padding: 0;
 }
 
 td {
@@ -243,6 +255,11 @@ input[name="amount"] {
   border-radius: 1.2rem;
   background-color: rgba(255, 255, 255, 0.15);
   box-sizing: border-box;
+  transition: background-color 0.3s ease;
+}
+
+input[name="amount"]:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 input[name="amount"]:focus {
@@ -321,19 +338,20 @@ transaction-table {
 }
 
 #app-stats-container {
-  height: 100%;
-  width: 100%;
-  display: block;
+  flex: 1;
+  min-width: 300px;
 }
 
 app-stats {
-  height: 30vh;
+  max-height: 50vh;
+  width: 100%;
   display: block;
 }
 
 #chart-canvas {
   height: 100%;
   width: 100%;
+  display: block;
 }
 
 .gsi-material-button {

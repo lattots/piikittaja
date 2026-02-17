@@ -10,11 +10,11 @@
   <body>
     <h1>PIIKKI</h1>
     <div class="flexbox" id="main-container">
-      <div class="container" style="flex-grow: 2; flex-direction: column">
+      <div class="container" id="user-view-container">
         <search-bar api-url="/api"></search-bar>
         <user-table api-url="/api"></user-table>
       </div>
-      <div class="container">
+      <div class="container" id="app-stats-container">
         <app-stats api-url="/api"></app-stats>
       </div>
     </div>
