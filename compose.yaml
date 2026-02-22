@@ -128,7 +128,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx
+    container_name: piikki_nginx
     restart: unless-stopped
     ports:
       - "80:80"
