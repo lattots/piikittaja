@@ -45,7 +45,63 @@ func (s *mariaDBStore) execute(userID, amount int) (int, error) {
 	return int(transactionID), nil
 }
 
-func (s *mariaDBStore) getTransactions(userID, quantity int) ([]*models.Transaction, error) {
+func (s *mariaDBStore) getTransactions(endDate time.Time, window time.Duration, traType string) ([]*models.Transaction, error) {
+	startDate := endDate.Add(-window)
+
+	var amountCondition string
+	switch traType {
+	case "deposit":
+		amountCondition = "AND amount > 0"
+	case "withdraw":
+		amountCondition = "AND amount < 0"
+	default:
+		// If no type is specified, return all transactions
+		amountCondition = ""
+	}
+
+	query := fmt.Sprintf("SELECT time, amount FROM transactions WHERE time >= ? AND time <= ? %s ORDER BY time DESC", amountCondition)
+
+	rows, err := s.db.Query(query, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []*models.Transaction
+
+	for rows.Next() {
+		transaction := &models.Transaction{}
+		var rawTime []uint8
+		if err := rows.Scan(&rawTime, &transaction.Amount); err != nil {
+			return nil, err
+		}
+
+		parsedTime, err := time.Parse("2006-01-02 15:04:05", string(rawTime))
+		if err != nil {
+			return nil, err
+		}
+		transaction.IssuedAt = parsedTime
+
+		// Since withdraw transactions are stored as negative amounts, transaction
+		// type must be set accordingly and the amount must be inversed.
+		if transaction.Amount < 0 {
+			transaction.Type = "withdraw"
+			transaction.Amount = -transaction.Amount
+		} else {
+			transaction.Type = "deposit"
+		}
+
+		transactions = append(transactions, transaction)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return transactions, nil
+}
+
+func (s *mariaDBStore) getUserTransactions(userID, quantity int) ([]*models.Transaction, error) {
 	rows, err := s.db.Query("SELECT time, amount FROM transactions WHERE userId=? ORDER BY time DESC LIMIT ?", userID, quantity)
 	if err != nil {
 		return nil, err

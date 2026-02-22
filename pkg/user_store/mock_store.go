@@ -30,18 +30,8 @@ func (s *mockStore) GetByID(id int) (*models.User, error) {
 	return user, nil
 }
 
-func (s *mockStore) GetByUsername(username string) (*models.User, error) {
-	for _, u := range s.users {
-		if u.Username == username {
-			return u, nil
-		}
-	}
-	return nil, ErrUserNotExists
-}
-
 func (s *mockStore) GetUsers() ([]*models.User, error) {
 	return slices.Collect(maps.Values(s.users)), nil
-
 }
 
 func (s *mockStore) SearchUsers(searchTerm string) ([]*models.User, error) {

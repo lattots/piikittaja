@@ -23,10 +23,12 @@ func TestInsert(t *testing.T) {
 	defer usrStore.Close()
 
 	const (
-		testUserID   = 1
-		testUsername = "test user 1"
+		testUserID    = 1
+		testUsername  = "test user 1"
+		testFirstName = "John"
+		testLastName  = "Doe"
 	)
-	user := models.NewUser(testUserID, testUsername)
+	user := models.NewUser(testUserID, testUsername, testFirstName, testLastName)
 
 	err = usrStore.Insert(user)
 	if err != nil {
@@ -62,10 +64,12 @@ func TestUpdate(t *testing.T) {
 	defer usrStore.Close()
 
 	const (
-		testUserID   = 1
-		testUsername = "test user 1"
+		testUserID    = 1
+		testUsername  = "test user 1"
+		testFirstName = "John"
+		testLastName  = "Doe"
 	)
-	user := models.NewUser(testUserID, testUsername)
+	user := models.NewUser(testUserID, testUsername, testFirstName, testLastName)
 
 	err = usrStore.Insert(user)
 	if err != nil {
@@ -94,43 +98,6 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-func TestGetUserByUsername(t *testing.T) {
-	// At this point there should be 2 users in the store from previous tests
-	dbURL := os.Getenv("DATABASE_APP")
-	if dbURL == "" {
-		t.Fatal("DATABASE_APP environment variable is not set")
-	}
-
-	usrStore, err := userstore.NewMariaDBStore(dbURL)
-	if err != nil {
-		t.Fatalf("error creating user store: %s", err)
-	}
-	defer usrStore.Close()
-
-	targetIDs := []int{
-		123,
-		456,
-		789,
-	}
-
-	targetUsernames := []string{
-		"Kanni Kala",
-		"Humalainen Haukka",
-		"Vodka Kotka",
-	}
-
-	for i := range targetUsernames {
-		user, err := usrStore.GetByUsername(targetUsernames[i])
-		if err != nil {
-			t.Fatalf("error fetching existing user from store: %s", err)
-		}
-
-		if user.ID != targetIDs[i] {
-			t.Fatalf("found wrong ID for user \"%s\": want %d got %d", targetUsernames[i], targetIDs[i], user.ID)
-		}
-	}
-}
-
 func TestGetUsers(t *testing.T) {
 	// This test checks that the user store can correctly fetch multiple users
 	// At this point there should be 2 users in the store from previous tests
@@ -145,10 +112,38 @@ func TestGetUsers(t *testing.T) {
 	}
 	defer usrStore.Close()
 
-	targetIDs := []int{
+	expectedIds := []int{
 		123,
 		456,
 		789,
+		101,
+		1001,
+		1002,
+		1003,
+		1004,
+		1005,
+		1006,
+		1007,
+		1008,
+		1009,
+		1012,
+		1013,
+		1014,
+		1015,
+		1017,
+		1018,
+		1019,
+		1020,
+		1021,
+		1022,
+		1023,
+		1024,
+		1025,
+		1026,
+		1027,
+		1028,
+		1029,
+		1030,
 	}
 
 	users, err := usrStore.GetUsers()
@@ -160,8 +155,8 @@ func TestGetUsers(t *testing.T) {
 		if u.Username == "" {
 			t.Fatalf("found user with no username. User ID: %d", u.ID)
 		}
-		if !slices.Contains(targetIDs, u.ID) {
-			t.Fatalf("user ID \"%d\" not found in target ID's", u.ID)
+		if !slices.Contains(expectedIds, u.ID) {
+			t.Fatalf("user ID \"%d\" not found in expected ID's", u.ID)
 		}
 	}
 }

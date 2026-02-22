@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/lattots/piikittaja/pkg/models"
 	"github.com/lattots/piikittaja/pkg/transaction"
@@ -122,9 +123,46 @@ func (h *Handler) NewTransaction(w http.ResponseWriter, r *http.Request) {
 	writeJSONResponse(w, http.StatusCreated, usrResp)
 }
 
+func (h *Handler) GetTransactions(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(time.Second * 2)
+	endDateStr := r.URL.Query().Get("endDate")
+	if endDateStr == "" {
+		http.Error(w, "no end date in query, please provide \"endDate\"", http.StatusBadRequest)
+		return
+	}
+	endDate, err := time.Parse(time.RFC3339, endDateStr)
+	if err != nil {
+		http.Error(w, "invalid end date format", http.StatusBadRequest)
+		return
+	}
+
+	windowStr := r.URL.Query().Get("window")
+	if windowStr == "" {
+		http.Error(w, "no transaction time window in query, please provide \"window\"", http.StatusBadRequest)
+		return
+	}
+	windowInt, err := strconv.Atoi(windowStr)
+	if err != nil {
+		http.Error(w, "invalid window in query", http.StatusBadRequest)
+		return
+	}
+	window := time.Duration(windowInt) * 24 * time.Hour // Window in request represents the number of days
+
+	traType := r.URL.Query().Get("type")
+
+	transactions, err := h.traHandler.GetTransactions(endDate, window, traType)
+	if err != nil {
+		log.Printf("error getting transactions: %s\n", err)
+		http.Error(w, "Failed to get transactions", http.StatusInternalServerError)
+		return
+	}
+
+	writeJSONResponse(w, http.StatusOK, transactions)
+}
+
 const defaultTransactionQuantity = 3
 
-func (h *Handler) GetTransactions(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetUserTransactions(w http.ResponseWriter, r *http.Request) {
 	userID := r.PathValue("userId")
 	if userID == "" {
 		http.Error(w, "No userId provided in request", http.StatusBadRequest)
@@ -152,7 +190,7 @@ func (h *Handler) GetTransactions(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	transactions, err := h.traHandler.GetTransactions(usr, quantity)
+	transactions, err := h.traHandler.GetUserTransactions(usr, quantity)
 	if err != nil {
 		log.Printf("error getting transactions for user %d: %s\n", usr.ID, err)
 		http.Error(w, "Failed to get transactions", http.StatusInternalServerError)

@@ -1,3 +1,3 @@
-import "./AppStats";
-import "./UserTable";
-import "./SearchBar";
+import "./AppStats.ts";
+import "./UserTable.ts";
+import "./SearchBar.ts";
