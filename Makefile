@@ -11,7 +11,6 @@ down:
 	docker compose down
 
 dev:
-	docker compose -f dev.compose.yaml up -d
 	docker compose -f dev.compose.yaml watch
 
 dev_down:

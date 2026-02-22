@@ -67,7 +67,6 @@ export class AppStats extends HTMLElement {
       data: {
         labels: dates,
         datasets: [{
-          label: "Withdrawals (Cents)",
           data: values,
           borderColor: "rgb(255, 130, 112)",
           backgroundColor: "rgba(255, 130, 112, 0.15)",
@@ -85,9 +84,10 @@ export class AppStats extends HTMLElement {
             ticks: {
               autoSkip: true,
               maxRotation: 0,
+              color: "rgba(255, 255, 255, 1)",
               callback: (val: any, index: any) => {
                 const d = new Date(dates[index]);
-                return d.toLocaleString("default", {
+                return d.toLocaleString("fi-FI", {
                   month: "short",
                   day: "numeric",
                 });
@@ -97,6 +97,7 @@ export class AppStats extends HTMLElement {
           y: {
             beginAtZero: true,
             ticks: {
+              color: "rgba(255, 255, 255, 1)",
               callback: (value: any) => `${(Number(value) / 100).toFixed(0)} €`,
             },
           },
