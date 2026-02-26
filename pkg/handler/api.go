@@ -124,7 +124,6 @@ func (h *Handler) NewTransaction(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetTransactions(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(time.Second * 2)
 	endDateStr := r.URL.Query().Get("endDate")
 	if endDateStr == "" {
 		http.Error(w, "no end date in query, please provide \"endDate\"", http.StatusBadRequest)
