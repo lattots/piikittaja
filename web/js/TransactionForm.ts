@@ -1,12 +1,26 @@
 import { User } from "./models.ts";
 
+import userStyles from "../css/user.css";
+import generalStyles from "../css/general.css";
+
+const userSheet = new CSSStyleSheet();
+userSheet.replaceSync(userStyles);
+
+const generalSheet = new CSSStyleSheet();
+generalSheet.replaceSync(generalStyles);
+
 export class TransactionForm extends HTMLElement {
+  private shadow: ShadowRoot;
+
   constructor() {
     super();
+    this.shadow = this.attachShadow({ mode: "open" });
+
+    this.shadow.adoptedStyleSheets = [generalSheet, userSheet];
   }
 
   connectedCallback() {
-    this.innerHTML =
+    this.shadow.innerHTML =
       `<p style="font-weight: bold">Loading transaction form...</p>`;
     this.render();
   }
@@ -16,7 +30,7 @@ export class TransactionForm extends HTMLElement {
   }
 
   render() {
-    this.innerHTML = `
+    this.shadow.innerHTML = `
 			<div class="transaction-container">
 				<form id="tx-form" autocomplete="off">
 					<div class="input-group">
@@ -32,10 +46,10 @@ export class TransactionForm extends HTMLElement {
 			</div>
 		`;
 
-    const txFormEl = this.querySelector("#tx-form");
+    const txFormEl = this.shadow.querySelector("#tx-form");
     if (!txFormEl) {
       console.log("No tx-form element");
-      this.innerHTML = `<p>Something went wrong:(`;
+      this.shadow.innerHTML = `<p>Something went wrong:(`;
       return;
     }
     txFormEl.addEventListener("submit", (e: Event) => this.handleSubmit(e));
@@ -52,7 +66,7 @@ export class TransactionForm extends HTMLElement {
     const form = e.target as HTMLFormElement;
     if (!form) return;
 
-    const statusEl = this.querySelector("#status") as HTMLElement;
+    const statusEl = this.shadow.querySelector("#status") as HTMLElement;
     if (!statusEl) return;
 
     const formData = new FormData(form);
@@ -110,6 +124,7 @@ export class TransactionForm extends HTMLElement {
       statusEl.textContent =
         "Tapahtuma epäonnistui: palvelimeen ei saatu yhteyttä.";
       statusEl.style.color = "#FF8270";
+      console.log(err);
     }
   }
 }

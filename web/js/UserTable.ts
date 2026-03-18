@@ -3,14 +3,28 @@ import { User } from "./models.ts";
 import { format } from "./monetaryUtil.ts";
 import "./UserModal.ts";
 
+import tableStyles from "../css/table.css";
+import generalStyles from "../css/general.css";
+
+const tableSheet = new CSSStyleSheet();
+tableSheet.replaceSync(tableStyles);
+
+const generalSheet = new CSSStyleSheet();
+generalSheet.replaceSync(generalStyles);
+
 export class UserTable extends HTMLElement {
   apiUrl: string = "";
   private tbody: HTMLElement | null = null;
 
   private handleSearchBound = this.handleSearchSuccess.bind(this);
 
+  private shadow: ShadowRoot;
+
   constructor() {
     super();
+    this.shadow = this.attachShadow({ mode: "open" });
+
+    this.shadow.adoptedStyleSheets = [generalSheet, tableSheet];
   }
 
   async connectedCallback() {
@@ -34,7 +48,7 @@ export class UserTable extends HTMLElement {
   }
 
   renderSkeleton() {
-    this.innerHTML = `
+    this.shadow.innerHTML = `
 			<table id="user-table">
 				<thead style="font-weight: bold">
 					<tr>
@@ -50,7 +64,7 @@ export class UserTable extends HTMLElement {
 			<user-modal id="global-modal" api-url="${this.apiUrl}"></user-modal>
 		`;
 
-    this.tbody = this.querySelector("#user-table-body");
+    this.tbody = this.shadow.querySelector("#user-table-body");
     this.setupEventListeners();
   }
 
@@ -84,7 +98,7 @@ export class UserTable extends HTMLElement {
   }
 
   setupEventListeners() {
-    const tbody = this.querySelector("tbody");
+    const tbody = this.shadow.querySelector("tbody");
     if (!tbody) return;
 
     tbody.addEventListener("click", (e) => {
@@ -93,7 +107,7 @@ export class UserTable extends HTMLElement {
       if (!row) return;
 
       const userId = row.getAttribute("data-id");
-      const modal = this.querySelector("#global-modal") as any;
+      const modal = this.shadow.querySelector("#global-modal") as any;
 
       if (modal && userId) {
         modal.setAttribute("user-id", userId);

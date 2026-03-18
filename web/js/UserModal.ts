@@ -3,17 +3,30 @@ import { format } from "./monetaryUtil.ts";
 import "./TransactionTable.ts";
 import "./TransactionForm.ts";
 
+import userStyles from "../css/user.css";
+import generalStyles from "../css/general.css";
+
+const userSheet = new CSSStyleSheet();
+userSheet.replaceSync(userStyles);
+
+const generalSheet = new CSSStyleSheet();
+generalSheet.replaceSync(generalStyles);
+
 export class UserModal extends HTMLElement {
   private dialog: HTMLDialogElement | null = null;
 
+  private shadow: ShadowRoot;
+
   constructor() {
     super();
-    this.attachShadow({ mode: "open" });
+    this.shadow = this.attachShadow({ mode: "open" });
+
+    this.shadow.adoptedStyleSheets = [generalSheet, userSheet];
   }
 
   connectedCallback() {
     this.render();
-    this.dialog = this.shadowRoot?.querySelector("dialog") || null;
+    this.dialog = this.shadow.querySelector("dialog") || null;
 
     if (this.dialog) {
       this.dialog.addEventListener("click", (e) => {
@@ -39,7 +52,7 @@ export class UserModal extends HTMLElement {
     const userId = this.getAttribute("user-id");
     const apiUrl = this.getAttribute("api-url");
 
-    const content = this.shadowRoot?.querySelector("#content");
+    const content = this.shadow.querySelector("#content");
     if (content) content.innerHTML = "<p>Loading details...</p>";
 
     this.dialog.showModal();
@@ -59,7 +72,7 @@ export class UserModal extends HTMLElement {
 
   private updateContent(user: User) {
     const apiUrl = this.getAttribute("api-url");
-    const content = this.shadowRoot?.querySelector("#content");
+    const content = this.shadow.querySelector("#content");
     if (!content) return;
 
     content.innerHTML = `
@@ -80,14 +93,11 @@ export class UserModal extends HTMLElement {
   }
 
   private render() {
-    if (!this.shadowRoot) return;
-    this.shadowRoot.innerHTML = `
-		<style>
-			@import url("style.css");
-		</style>
-           <dialog class="modal">
-                <div id="content"></div>
-            </dialog>
+    if (!this.shadow) return;
+    this.shadow.innerHTML = `
+         <dialog class="modal">
+              <div id="content"></div>
+          </dialog>
         `;
   }
 }
@@ -97,6 +107,7 @@ function renderUserInfo(user: User): string {
     ? `${user.firstName} ${user.lastName}`
     : "Matti Meikalainen";
   const balanceColorClass: string = (user.balance >= 0) ? "green" : "red";
+  console.log(balanceColorClass);
   return `
 		<h2>${user.username}</h2>
 		<div class="flexbox" style="justify-content: space-between">

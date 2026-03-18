@@ -31,10 +31,12 @@ func main() {
 	router.HandleFunc("POST /users/{userId}/transactions", h.NewTransaction)
 	router.HandleFunc("GET /transactions", h.GetTransactions)
 
+	logRouter := handler.Log(router.ServeHTTP)
+
 	const port = ":8080"
 	fmt.Printf("Server started on port %s\n", port)
 
-	if err = http.ListenAndServe(port, router); err != nil {
+	if err = http.ListenAndServe(port, logRouter); err != nil {
 		log.Fatalln("unexpected error: ", err)
 	}
 }
