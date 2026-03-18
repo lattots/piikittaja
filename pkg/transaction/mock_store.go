@@ -1,6 +1,10 @@
 package transaction
 
-import "github.com/lattots/piikittaja/pkg/models"
+import (
+	"time"
+
+	"github.com/lattots/piikittaja/pkg/models"
+)
 
 type mockStore struct {
 	transactions map[int]mockEntry
@@ -8,8 +12,9 @@ type mockStore struct {
 }
 
 type mockEntry struct {
-	userID int
-	amount int
+	userID   int
+	amount   int
+	issuedAt time.Time
 }
 
 func NewMockStore() TransactionStore {
@@ -24,12 +29,38 @@ func (s *mockStore) Close() error {
 func (s *mockStore) execute(userID, amount int) (int, error) {
 	transactionID := s.nextID
 	s.nextID++
-	s.transactions[transactionID] = mockEntry{userID: userID, amount: amount}
+	newTra := mockEntry{
+		userID:   userID,
+		amount:   amount,
+		issuedAt: time.Now(),
+	}
+	s.transactions[transactionID] = newTra
 
 	return transactionID, nil
 }
 
-func (s *mockStore) getTransactions(userID, quantity int) ([]*models.Transaction, error) {
+func (s *mockStore) getTransactions(endDate time.Time, window time.Duration, traType string) ([]*models.Transaction, error) {
+	res := make([]*models.Transaction, 0)
+
+	for _, t := range s.transactions {
+		if t.issuedAt.Before(endDate) && t.issuedAt.After(endDate.Add(-window)) {
+			resTransaction := &models.Transaction{
+				Amount: t.amount,
+			}
+			if resTransaction.Amount < 0 {
+				resTransaction.Type = "withdraw"
+				resTransaction.Amount = -resTransaction.Amount
+			} else {
+				resTransaction.Type = "deposit"
+			}
+			res = append(res, resTransaction)
+		}
+	}
+
+	return res, nil
+}
+
+func (s *mockStore) getUserTransactions(userID, quantity int) ([]*models.Transaction, error) {
 	var res []*models.Transaction
 
 	for _, t := range s.transactions {
@@ -40,6 +71,8 @@ func (s *mockStore) getTransactions(userID, quantity int) ([]*models.Transaction
 			if resTransaction.Amount < 0 {
 				resTransaction.Type = "withdraw"
 				resTransaction.Amount = -resTransaction.Amount
+			} else {
+				resTransaction.Type = "deposit"
 			}
 			res = append(res, resTransaction)
 

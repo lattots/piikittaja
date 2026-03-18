@@ -28,18 +28,21 @@ func main() {
 	// API routes
 	router.HandleFunc("GET /users/{userId}", auth.RequireAuthentication(h.GetUserByID, h.Auth))
 	router.HandleFunc("GET /users", auth.RequireAuthentication(h.GetUsers, h.Auth))
-	router.HandleFunc("GET /users/{userId}/transactions", auth.RequireAuthentication(h.GetTransactions, h.Auth))
+	router.HandleFunc("GET /users/{userId}/transactions", auth.RequireAuthentication(h.GetUserTransactions, h.Auth))
 	router.HandleFunc("POST /users/{userId}/transactions", auth.RequireAuthentication(h.NewTransaction, h.Auth))
+	router.HandleFunc("GET /transactions", auth.RequireAuthentication(h.GetTransactions, h.Auth))
 
 	// Auth
 	router.HandleFunc("GET /auth/{provider}/callback", h.HandleAuthCallback)
 	router.HandleFunc("GET /logout/{provider}", h.HandleLogout)
 	router.HandleFunc("GET /auth/{provider}", h.HandleProviderLogin)
 
+	logRouter := handler.Log(router.ServeHTTP)
+
 	const port = ":8080"
 	fmt.Printf("Server started on port %s\n", port)
 
-	if err = http.ListenAndServe(port, router); err != nil {
+	if err = http.ListenAndServe(port, logRouter); err != nil {
 		log.Fatalln("unexpected error: ", err)
 	}
 }

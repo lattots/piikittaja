@@ -1,23 +1,27 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PiikkiBotti</title>
-    <link rel="icon" type="image/png" href="assets/favicon.png" />
-    <link href="style.css" rel="stylesheet" />
-  </head>
-  <body>
-    <h1>PIIKKI</h1>
-    <div class="flexbox" id="main-container">
-      <div class="container" style="flex-grow: 2; flex-direction: column">
-        <search-bar api-url="/api"></search-bar>
-        <user-table api-url="/api"></user-table>
-      </div>
-      <div class="container">
-        <app-stats></app-stats>
-      </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PiikkiBotti</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link href="general.css" rel="stylesheet" />
+</head>
+
+<body>
+  <h1>PIIKKI</h1>
+  <div class="flexbox" id="main-container">
+    <div class="container" id="user-view-container">
+      <search-bar api-url="/api"></search-bar>
+      <user-table api-url="/api"></user-table>
     </div>
-    <script type="module" src="index.js"></script>
-  </body>
+    <div class="container" id="app-stats-container">
+      <withdraw-chart api-url="/api"></withdraw-chart>
+      <stat-controls></stat-controls>
+    </div>
+  </div>
+  <script type="module" src="index.js"></script>
+</body>
+
 </html>

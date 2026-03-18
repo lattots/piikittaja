@@ -1,34 +1,54 @@
-import { fetchUsers } from "./api"
-import { User } from "./models"
-import { format } from "./monetaryUtil"
-import "./UserModal"
+import { fetchUsers } from "./api.ts";
+import { User } from "./models.ts";
+import { format } from "./monetaryUtil.ts";
+import "./UserModal.ts";
+
+import tableStyles from "../css/table.css";
+import generalStyles from "../css/general.css";
+
+const tableSheet = new CSSStyleSheet();
+tableSheet.replaceSync(tableStyles);
+
+const generalSheet = new CSSStyleSheet();
+generalSheet.replaceSync(generalStyles);
 
 export class UserTable extends HTMLElement {
-	apiUrl: string = ""
-	private tbody: HTMLElement | null = null;
+  apiUrl: string = "";
+  private tbody: HTMLElement | null = null;
 
-	private handleSearchBound = this.handleSearchSuccess.bind(this);
+  private handleSearchBound = this.handleSearchSuccess.bind(this);
 
-	constructor() {
-		super()
-	}
+  private shadow: ShadowRoot;
 
-	async connectedCallback() {
-		this.apiUrl = this.getAttribute("api-url") || ""
+  constructor() {
+    super();
+    this.shadow = this.attachShadow({ mode: "open" });
 
-		this.renderSkeleton();
+    this.shadow.adoptedStyleSheets = [generalSheet, tableSheet];
+  }
 
-		await this.loadInitialUsers();
+  async connectedCallback() {
+    this.apiUrl = this.getAttribute("api-url") || "";
 
-		window.addEventListener("search-success", this.handleSearchBound as EventListener);
-	}
+    this.renderSkeleton();
 
-	disconnectedCallback() {
-		window.removeEventListener("search-success", this.handleSearchBound as EventListener);
-	}
+    await this.loadInitialUsers();
 
-	renderSkeleton() {
-		this.innerHTML = `
+    window.addEventListener(
+      "search-success",
+      this.handleSearchBound as EventListener,
+    );
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener(
+      "search-success",
+      this.handleSearchBound as EventListener,
+    );
+  }
+
+  renderSkeleton() {
+    this.shadow.innerHTML = `
 			<table id="user-table">
 				<thead style="font-weight: bold">
 					<tr>
@@ -44,64 +64,69 @@ export class UserTable extends HTMLElement {
 			<user-modal id="global-modal" api-url="${this.apiUrl}"></user-modal>
 		`;
 
-		this.tbody = this.querySelector("#user-table-body");
-		this.setupEventListeners();
-	}
+    this.tbody = this.shadow.querySelector("#user-table-body");
+    this.setupEventListeners();
+  }
 
-	async loadInitialUsers() {
-		try {
-			const users = await fetchUsers(this.apiUrl);
-			this.updateRows(users);
-		} catch (error) {
-			console.error("Failed to load initial users:", error);
-			if (this.tbody) this.tbody.innerHTML = `<tr><td colspan="3">Käyttäjien lataaminen epäonnistui</td></tr>`;
-		}
-	}
+  async loadInitialUsers() {
+    try {
+      const users = await fetchUsers(this.apiUrl);
+      this.updateRows(users);
+    } catch (error) {
+      console.error("Failed to load initial users:", error);
+      if (this.tbody) {
+        this.tbody.innerHTML =
+          `<tr><td colspan="3">Käyttäjien lataaminen epäonnistui</td></tr>`;
+      }
+    }
+  }
 
-	handleSearchSuccess(e: CustomEvent) {
-		const users = e.detail.users;
-		this.updateRows(users);
-	}
+  handleSearchSuccess(e: CustomEvent) {
+    const users = e.detail.users;
+    this.updateRows(users);
+  }
 
-	updateRows(users: User[]) {
-		if (!this.tbody) return;
+  updateRows(users: User[]) {
+    if (!this.tbody) return;
 
-		if (users.length === 0) {
-			this.tbody.innerHTML = `<tr><td colspan="3">Ei käyttäjiä</td></tr>`;
-			return;
-		}
+    if (users.length === 0) {
+      this.tbody.innerHTML = `<tr><td colspan="3">Ei käyttäjiä</td></tr>`;
+      return;
+    }
 
-		this.tbody.innerHTML = renderUsers(users);
-	}
+    this.tbody.innerHTML = renderUsers(users);
+  }
 
-	setupEventListeners() {
-		const tbody = this.querySelector("tbody");
-		if (!tbody) return;
+  setupEventListeners() {
+    const tbody = this.shadow.querySelector("tbody");
+    if (!tbody) return;
 
-		tbody.addEventListener("click", (e) => {
-			const target = e.target as Element;
-			const row = target.closest(".user-row") as HTMLTableRowElement | null;
-			if (!row) return;
+    tbody.addEventListener("click", (e) => {
+      const target = e.target as Element;
+      const row = target.closest(".user-row") as HTMLTableRowElement | null;
+      if (!row) return;
 
-			const userId = row.getAttribute("data-id");
-			const modal = this.querySelector("#global-modal") as any;
+      const userId = row.getAttribute("data-id");
+      const modal = this.shadow.querySelector("#global-modal") as any;
 
-			if (modal && userId) {
-				modal.setAttribute("user-id", userId);
-				modal.open();
-			}
-		});
-	}
+      if (modal && userId) {
+        modal.setAttribute("user-id", userId);
+        modal.open();
+      }
+    });
+  }
 }
 
 export function renderUsers(users: User[]): string {
-	return users.map(user => `
+  return users.map((user) => `
 		<tr class="user-row" data-id="${user.id}" style="cursor: pointer;">
 			<td>${user.firstName} ${user.lastName}</td>
 			<td>${user.username}</td>
-			<td style="text-align: right; padding-right: 1.2rem">${format(user.balance)}</td>
+			<td style="text-align: right; padding-right: 1.2rem">${
+    format(user.balance)
+  }</td>
 		</tr>
-	`).join("")
+	`).join("");
 }
 
-customElements.define("user-table", UserTable)
+customElements.define("user-table", UserTable);

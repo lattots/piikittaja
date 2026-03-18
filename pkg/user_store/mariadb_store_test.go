@@ -23,10 +23,12 @@ func TestInsert(t *testing.T) {
 	defer usrStore.Close()
 
 	const (
-		testUserID   = 1
-		testUsername = "test user 1"
+		testUserID        = 1
+		testUsername      = "test user 1"
+		testUserFirstName = "John"
+		testUserLastName  = "Doe"
 	)
-	user := models.NewUser(testUserID, testUsername)
+	user := models.NewUser(testUserID, testUsername, testUserFirstName, testUserLastName)
 
 	err = usrStore.Insert(user)
 	if err != nil {
@@ -62,10 +64,12 @@ func TestUpdate(t *testing.T) {
 	defer usrStore.Close()
 
 	const (
-		testUserID   = 1
-		testUsername = "test user 1"
+		testUserID        = 1
+		testUsername      = "test user 1"
+		testUserFirstName = "John"
+		testUserLastName  = "Doe"
 	)
-	user := models.NewUser(testUserID, testUsername)
+	user := models.NewUser(testUserID, testUsername, testUserFirstName, testUserLastName)
 
 	err = usrStore.Insert(user)
 	if err != nil {
@@ -108,15 +112,16 @@ func TestGetUserByUsername(t *testing.T) {
 	defer usrStore.Close()
 
 	targetIDs := []int{
-		123,
-		456,
-		789,
+		123, 456, 789, 101, 1001, 1002, 1003, 1004, 1005,
+		1006, 1007, 1008, 1009, 1012, 1013, 1014, 1015,
+		1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024,
+		1025, 1026, 1027, 1028, 1029, 1030,
 	}
 
 	targetUsernames := []string{
-		"Kanni Kala",
-		"Humalainen Haukka",
-		"Vodka Kotka",
+		"kannikala",
+		"hhaukka",
+		"vodkis",
 	}
 
 	for i := range targetUsernames {
@@ -146,9 +151,10 @@ func TestGetUsers(t *testing.T) {
 	defer usrStore.Close()
 
 	targetIDs := []int{
-		123,
-		456,
-		789,
+		123, 456, 789, 101, 1001, 1002, 1003, 1004, 1005,
+		1006, 1007, 1008, 1009, 1012, 1013, 1014, 1015,
+		1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024,
+		1025, 1026, 1027, 1028, 1029, 1030,
 	}
 
 	users, err := usrStore.GetUsers()

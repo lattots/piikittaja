@@ -1,43 +1,74 @@
-import { Transaction } from "./models";
-import { format } from "./monetaryUtil";
+import { fetchUserTransactions } from "./api.ts";
+import { ApiError } from "./errors.ts";
+import { Transaction } from "./models.ts";
+import { format } from "./monetaryUtil.ts";
+
+import userStyles from "../css/user.css";
+import generalStyles from "../css/general.css";
+
+const userSheet = new CSSStyleSheet();
+userSheet.replaceSync(userStyles);
+
+const generalSheet = new CSSStyleSheet();
+generalSheet.replaceSync(generalStyles);
 
 export class TransactionTable extends HTMLElement {
-	constructor() {
-		super()
-	}
+  private shadow: ShadowRoot;
 
-	async connectedCallback() {
-		this.innerHTML = `<p style="font-weight: bold">Loading transactions...</p>`
-		await this.render()
-	}
+  constructor() {
+    super();
+    this.shadow = this.attachShadow({ mode: "open" });
 
-	async render() {
-		const userId = this.getAttribute("user-id");
-		const apiUrl = this.getAttribute("api-url");
+    this.shadow.adoptedStyleSheets = [generalSheet, userSheet];
+  }
 
-		const transactionQuantity: number = 30;
+  async connectedCallback() {
+    this.shadow.innerHTML = `<p>Ladataan maksutapahtumia...</p>`;
+    try {
+      await this.render();
+    } catch (err) {
+      this.shadow.innerHTML = `<p>Maksutapahtumien lataaminen epäonnistui.</p>`;
+      console.error(err);
+    }
+  }
 
-		const resp = await fetch(`${apiUrl}/users/${userId}/transactions?quantity=${transactionQuantity}`)
-		if (resp.status === 401 || resp.status === 403) {
-			window.location.href = '/login';
-			return;
-		}
+  async render() {
+    const userId = this.getAttribute("user-id");
+    if (!userId) {
+      console.error("user-id not provided for transaction-table");
+      return;
+    }
+    const apiUrl = this.getAttribute("api-url");
+    if (!apiUrl) {
+      console.error("api-url not provided for transaction-table");
+      return;
+    }
 
-		if (!resp.ok) return;
+    const transactionQuantity: number = 30;
 
-		const rawData: any[] = await resp.json();
+    let transactions: Transaction[];
+    try {
+      transactions = await fetchUserTransactions(
+        apiUrl,
+        userId,
+        transactionQuantity,
+      );
+    } catch (error) {
+      if (error instanceof ApiError) {
+        window.location.href = "/login";
+        return;
+      }
+      console.log(error);
+      return;
+    }
 
-		if (!rawData || rawData.length === 0) {
-			this.innerHTML = "<p>Tällä käyttäjällä ei ole vielä yhtäkään maksutapahtumaa</p>"
-			return
-		}
+    if (transactions.length === 0) {
+      this.shadow.innerHTML =
+        "<p>Tällä käyttäjällä ei ole vielä yhtäkään maksutapahtumaa.</p>";
+      return;
+    }
 
-		const transactions: Transaction[] = rawData.map(t => ({
-			...t,
-			issuedAt: new Date(t.issuedAt)
-		}));
-
-		this.innerHTML = `
+    this.shadow.innerHTML = `
             <table id="transaction-table">
                 <thead style="font-weight: bold">
                     <tr>
@@ -50,28 +81,36 @@ export class TransactionTable extends HTMLElement {
                 </tbody>
             </table>
         `;
-	}
+  }
 }
 
 function renderTransaction(transaction: Transaction): string {
-	const assetDir: string = "/app/assets/";
-	const typeIconSource: string = (transaction.type === "deposit") ? "deposit.svg" : "withdraw.svg";
-	const iconColor: string = (transaction.type === "deposit") ? "#54DF60" : "#FF8270";
-	const iconPath: string = assetDir + typeIconSource;
+  const assetDir: string = "/app/assets/";
+  const typeIconSource: string = (transaction.type === "deposit")
+    ? "deposit.svg"
+    : "withdraw.svg";
+  const iconColor: string = (transaction.type === "deposit")
+    ? "#54DF60"
+    : "#FF8270";
+  const iconPath: string = assetDir + typeIconSource;
 
-	const now = new Date().getTime();
-	const transactionTime = transaction.issuedAt.getTime();
-	const isNew = (now - transactionTime) < 3000; // 3 s
+  const now = new Date().getTime();
+  const transactionTime = transaction.issuedAt.getTime();
+  const isNew = (now - transactionTime) < 3000; // 3 s
 
-	let flashClass = "";
-	if (isNew) {
-		flashClass = (transaction.type === "deposit") ? "new-deposit" : "new-withdraw";
-	}
+  let flashClass = "";
+  if (isNew) {
+    flashClass = (transaction.type === "deposit")
+      ? "new-deposit"
+      : "new-withdraw";
+  }
 
-	return `
+  return `
         <tr class="${flashClass}">
             <td>${formatDate(transaction.issuedAt)}</td>
-            <td style="text-align: right; padding-right: 0.5rem">${format(transaction.amount)}</td>
+            <td style="text-align: right; padding-right: 0.5rem">${
+    format(transaction.amount)
+  }</td>
             <td style="display: flex; justify-content: center; align-content: center; min-width: 32px">
                 <div style="
                     width: 24px; 
@@ -88,13 +127,13 @@ function renderTransaction(transaction: Transaction): string {
 }
 
 function formatDate(date: Date): string {
-	const day = String(date.getDate()).padStart(2, "0");
-	const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
-	const year = String(date.getFullYear()).slice(-2); // Get last 2 digits
-	const hours = String(date.getHours()).padStart(2, "0");
-	const minutes = String(date.getMinutes()).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  const year = String(date.getFullYear()).slice(-2); // Get last 2 digits
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
 
-	return `${day}.${month}.${year} ${hours}:${minutes}`;
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
 }
 
 customElements.define("transaction-table", TransactionTable);
