@@ -12,7 +12,7 @@ func TestValidTransactions(t *testing.T) {
 	store := transaction.NewMockStore()
 	handler := transaction.NewTransactionHandler(store)
 
-	user := models.NewUser(0, "test user", "John", "Doe")
+	user := models.NewUser(0, "test user", "Tim", "Tester")
 
 	_, err := handler.Deposit(user, 100_00)
 	if err != nil {
@@ -42,11 +42,31 @@ func TestValidTransactions(t *testing.T) {
 	}
 }
 
+func TestVIPTransactions(t *testing.T) {
+	store := transaction.NewMockStore()
+	handler := transaction.NewTransactionHandler(store)
+
+	user := models.NewUser(0, "maanmittauskilta", "ABC", "123")
+
+	_, err := handler.Withdraw(user, 100_00)
+	if err != nil {
+		t.Fatalf("valid withdraw failed: %s", err)
+	}
+
+	user2 := models.NewUser(0, "abc", "Noora", "Koskela")
+
+	_, err = handler.Withdraw(user2, 100_00)
+	if err != nil {
+		t.Fatalf("valid withdraw failed: %s", err)
+	}
+
+}
+
 func TestInvalidTransactions(t *testing.T) {
 	store := transaction.NewMockStore()
 	handler := transaction.NewTransactionHandler(store)
 
-	user := models.NewUser(0, "test user", "John", "Doe")
+	user := models.NewUser(0, "test user", "Tim", "Tester")
 
 	_, err := handler.Deposit(user, -1)
 	if !errors.Is(err, transaction.ErrInvalidAmount) {
