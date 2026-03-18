@@ -1,0 +1,115 @@
+body {
+	color: white;
+	font-family: sans-serif;
+
+	min-height: 100vh;
+
+	background-image: url("assets/background.webp");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+}
+
+h1 {
+	font-size: clamp(2rem, 20vw, 8rem);
+	text-align: center;
+	margin-left: 0;
+	margin-right: 0;
+}
+
+h2 {
+	font-size: 2rem;
+}
+
+p {
+	font-size: 1rem;
+}
+
+#main-container {
+	margin-left: 1.2rem;
+	margin-right: 1.2rem;
+	flex-direction: row;
+}
+
+#user-view-container {
+	flex: 2;
+	flex-direction: column;
+	min-width: 300px;
+}
+
+#app-stats-container {
+	flex: 1;
+	flex-direction: column;
+	justify-content: flex-start;
+	gap: 1.5rem;
+	min-width: 300px;
+}
+
+.flexbox {
+	display: flex;
+	justify-content: space-evenly;
+	flex-wrap: wrap;
+	gap: 1.2rem;
+}
+
+.container {
+	display: flex;
+	justify-content: space-evenly;
+	align-items: stretch;
+
+	padding: 1.2rem;
+	border-radius: 1.2rem;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(0.5rem);
+	-webkit-backdrop-filter: blur(0.5rem);
+}
+
+.button {
+	flex: 1;
+	height: 4rem;
+	border-radius: 1.2rem;
+	font-weight: bold;
+	font-size: 1rem;
+	cursor: pointer;
+	border: none;
+	transition: background-color 0.2s;
+}
+
+user-table {
+	width: 100%;
+	display: block;
+	max-height: 70vh;
+	overflow-y: auto;
+
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+user-table::-webkit-scrollbar {
+	width: 8px;
+}
+
+user-table::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+user-table::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.2);
+	border-radius: 10px;
+}
+
+user-table::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.4);
+}
+
+withdraw-chart {
+	height: 50vh;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	display: block;
+}
+
+stat-controls {
+	display: flex;
+	justify-content: center;
+}

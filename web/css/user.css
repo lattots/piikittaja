@@ -1,0 +1,176 @@
+.modal {
+	color: white;
+
+	outline: none;
+	border-radius: 2rem;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+
+	width: 20rem;
+	align-items: center;
+	align-content: center;
+
+	background-color: transparent;
+	backdrop-filter: blur(1rem);
+	-webkit-backdrop-filter: blur(1rem);
+
+	max-height: 70vh;
+	overflow-y: auto;
+
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+dialog::backdrop {
+	backdrop-filter: blur(0.5rem);
+}
+
+#balance-display {
+	padding: 0.5rem;
+	border-radius: 1rem;
+	aspect-ratio: 1 / 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 3rem;
+}
+
+:host {
+	--green-base: 84, 223, 96;
+	--red-base: 255, 130, 112;
+}
+
+.green {
+	background-color: rgba(var(--green-base), 0.2);
+	color: rgb(var(--green-base));
+}
+
+.button.green:hover {
+	background-color: rgba(var(--green-base), 0.4);
+}
+
+.red {
+	background-color: rgba(var(--red-base), 0.2);
+	color: rgb(var(--red-base));
+}
+
+.button.red:hover {
+	background-color: rgba(var(--red-base), 0.4);
+}
+
+#transaction-icon {
+	max-height: 32px;
+}
+
+.transaction-container {
+	margin: 2rem auto;
+	text-align: center;
+}
+
+#tx-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.2rem;
+}
+
+.input-group {
+	position: relative;
+	width: 100%;
+}
+
+.input-group label {
+	position: absolute;
+	right: 1rem;
+	top: 50%;
+	transform: translateY(-50%);
+
+	font-size: 1.5rem;
+	font-weight: bold;
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+input[name="amount"] {
+	color: white;
+	width: 100%;
+	font-size: 1.5rem;
+	font-weight: bold;
+	text-align: center;
+
+	height: 4rem;
+	border: none;
+	outline: none;
+	border-radius: 1.2rem;
+	background-color: rgba(255, 255, 255, 0.15);
+	box-sizing: border-box;
+	transition: background-color 0.3s ease;
+}
+
+input[name="amount"]:hover {
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
+input[name="amount"]:focus {
+	background-color: rgba(255, 255, 255, 0.4);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type="number"] {
+	appearance: textfield;
+	-moz-appearance: textfield;
+}
+
+.action-buttons {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+transaction-table {
+	width: 100%;
+}
+
+#transaction-table {
+	border-collapse: separate;
+	border-spacing: 1rem 0.5rem;
+	width: 100%;
+}
+
+#transaction-table th {
+	padding: 1rem 0.5rem 1rem 0.5rem;
+	border-radius: 1rem;
+	background-color: rgba(255, 255, 255, 0.15);
+}
+
+@keyframes flash-green {
+	0% {
+		background-color: rgba(var(--green-base), 0.4);
+	}
+
+	100% {
+		background-color: transparent;
+	}
+}
+
+@keyframes flash-red {
+	0% {
+		background-color: rgba(var(--red-base), 0.4);
+	}
+
+	100% {
+		background-color: transparent;
+	}
+}
+
+.new-deposit {
+	animation: flash-green 3s ease-out;
+}
+
+.new-withdraw {
+	animation: flash-red 3s ease-out;
+}

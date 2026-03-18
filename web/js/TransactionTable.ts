@@ -3,17 +3,31 @@ import { ApiError } from "./errors.ts";
 import { Transaction } from "./models.ts";
 import { format } from "./monetaryUtil.ts";
 
+import userStyles from "../css/user.css";
+import generalStyles from "../css/general.css";
+
+const userSheet = new CSSStyleSheet();
+userSheet.replaceSync(userStyles);
+
+const generalSheet = new CSSStyleSheet();
+generalSheet.replaceSync(generalStyles);
+
 export class TransactionTable extends HTMLElement {
+  private shadow: ShadowRoot;
+
   constructor() {
     super();
+    this.shadow = this.attachShadow({ mode: "open" });
+
+    this.shadow.adoptedStyleSheets = [generalSheet, userSheet];
   }
 
   async connectedCallback() {
-    this.innerHTML = `<p>Ladataan maksutapahtumia...</p>`;
+    this.shadow.innerHTML = `<p>Ladataan maksutapahtumia...</p>`;
     try {
       await this.render();
     } catch (err) {
-      this.innerHTML = `<p>Maksutapahtumien lataaminen epäonnistui.</p>`;
+      this.shadow.innerHTML = `<p>Maksutapahtumien lataaminen epäonnistui.</p>`;
       console.error(err);
     }
   }
@@ -49,12 +63,12 @@ export class TransactionTable extends HTMLElement {
     }
 
     if (transactions.length === 0) {
-      this.innerHTML =
+      this.shadow.innerHTML =
         "<p>Tällä käyttäjällä ei ole vielä yhtäkään maksutapahtumaa.</p>";
       return;
     }
 
-    this.innerHTML = `
+    this.shadow.innerHTML = `
             <table id="transaction-table">
                 <thead style="font-weight: bold">
                     <tr>

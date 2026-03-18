@@ -4,6 +4,7 @@ export interface ChartData {
   dates: string[];
   values: number[];
   maxVal: number;
+  windowDays: number;
 }
 
 export function processTransactionsForGraph(
@@ -38,5 +39,5 @@ export function processTransactionsForGraph(
     if (val > maxVal) maxVal = val;
   }
 
-  return { dates, values, maxVal };
+  return { dates, values, maxVal, windowDays };
 }

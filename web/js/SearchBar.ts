@@ -1,12 +1,26 @@
 import { fetchUsers } from "./api.ts";
 
+import tableStyles from "../css/table.css";
+import generalStyles from "../css/general.css";
+
+const tableSheet = new CSSStyleSheet();
+tableSheet.replaceSync(tableStyles);
+
+const generalSheet = new CSSStyleSheet();
+generalSheet.replaceSync(generalStyles);
+
 export class SearchBar extends HTMLElement {
   private timer: number | undefined;
   private abortController: AbortController | null = null;
   private inputElement: HTMLInputElement | null = null;
 
+  private shadow: ShadowRoot;
+
   constructor() {
     super();
+    this.shadow = this.attachShadow({ mode: "open" });
+
+    this.shadow.adoptedStyleSheets = [generalSheet, tableSheet];
   }
 
   connectedCallback() {
@@ -19,12 +33,12 @@ export class SearchBar extends HTMLElement {
   }
 
   render() {
-    this.innerHTML = `
+    this.shadow.innerHTML = `
 			<div class="search-container">
 				<input type="text" placeholder="Hae" />
 			</div>
 		`;
-    this.inputElement = this.querySelector("input");
+    this.inputElement = this.shadow.querySelector("input");
   }
 
   setupEventListeners() {
