@@ -55,5 +55,5 @@ jobs:
       - name: Deploy
         run: |
           ssh "${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }}" \
-            "cd /srv/app/piikki && docker compose up -d --build
+            "cd /srv/app/piikki && docker compose up -d --build"
 
