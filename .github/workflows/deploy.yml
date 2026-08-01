@@ -1,4 +1,5 @@
-name: Deploy
+name: Deploy Application
+
 on:
   push:
     branches:
@@ -9,18 +10,50 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd ${{ secrets.PROJECT_PATH }}
-            
-            git pull origin main
-            
-            make upd
-            
-            docker image prune -f
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Docker secret files
+        run: |
+          mkdir -p secrets
+
+          printf "%s" "${{ secrets.DB_ROOT_PASSWORD }}" > secrets/db_root_password.txt
+
+          printf "%s" "${{ secrets.DB_APP_USER }}" > secrets/db_app_user.txt
+          printf "%s" "${{ secrets.DB_APP_PASSWORD }}" > secrets/db_app_password.txt
+
+          printf "%s" "${{ secrets.TELEGRAM_TOKEN }}" > secrets/telegram_token.txt
+
+          printf "%s" "${{ secrets.COOKIE_STORE_SECRET }}" > secrets/cookie_store_secret.txt
+
+          printf "%s" "${{ secrets.GOOGLE_KEY }}" > secrets/google_key.txt
+          printf "%s" "${{ secrets.GOOGLE_SECRET }}" > secrets/google_secret.txt
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Create application directory
+        run: |
+          ssh "${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }}" \
+            "mkdir -p /srv/app/piikki"
+
+      - name: Sync application
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519" \
+            --exclude ".git" \
+            --exclude ".github" \
+            ./ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }}:/srv/app/piikki/
+
+      - name: Deploy
+        run: |
+          ssh "${{ secrets.SSH_USER }}@${{ secrets.SERVER_HOST }}" \
+            "cd /srv/app/piikki && docker compose up -d --build
+
