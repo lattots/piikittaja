@@ -22,8 +22,8 @@ var (
 
 // canWithdraw is a helper function to check if user can withdraw specified amount
 func canWithdraw(user *models.User, amount int) bool {
-	const debtThreshold = 10_00 // = 10 €
-	return user.Balance+debtThreshold >= amount || user.Username == "maanmittauskilta" || (user.FirstName == "Noora" && user.LastName == "Koskela")
+	const debtThreshold = 20_00 // = 20 €
+	return user.Balance+debtThreshold >= amount || user.Username == "maanmittauskilta" || user.Username == "arkkitonttu"
 }
 
 type transactionHandler struct {
